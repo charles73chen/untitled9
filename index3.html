@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<meta charset="utf-8">
+<link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet"/>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<style>
+    .container {
+        position: relative;
+        display: flex;
+        width: max-content;
+        height: max-content;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container #video {
+        width: 600px;
+        height: 400px;
+        border-radius: 20px;
+    }
+
+    .container .controls {
+        position: absolute;
+        bottom: 40px;
+        width: 95%;
+        display: flex;
+        justify-content: space-around;
+        opacity: 0.2;
+        transition: opacity 0.4s;
+    }
+
+    .container:hover .controls {
+        opacity: 1;
+    }
+
+    .container .controls button {
+        background: transparent;
+        color: #fff;
+        font-weight: bolder;
+        text-shadow: 2px 1px 2px #000;
+        border: none;
+        cursor: pointer;
+    }
+
+    .container .controls .timeline {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        border: none;
+        /*border-right: 3px solid #ccc;
+        border-left: 3px solid #ccc;*/
+    }
+
+    .container .controls .timeline .bar {
+        background: rgb(1, 1, 65);
+        height: 4px;
+        flex: 1;
+    }
+
+    .container .controls .timeline .bar .inner {
+        background: #ccc;
+        width: 0%;
+        height: 100%;
+    }
+
+    .container .controls .timeline .bar .inner2 {
+        background: #e83d3d;
+        width: 0%;
+        height: 100%;
+    }
+
+    .fa {
+        font-size: 20px !important;
+    }
+
+
+</style>
+<!--<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>-->
+<body id="">
+<label id="dvrs"></label>
+<input type="datetime-local" id="ttime">
+<select id="crar"></select>
+<button onclick="pl1()">即時</button>
+
+<button onclick="pl2()">回放</button>
+<!--<button onclick="addsec(-30)" data-type="control" style="display: none">-30秒</button>
+<button onclick="addsec(30)" data-type="control" style="display: none">+30秒</button>
+-->
+<br>
+<!--<button onclick="allplay()">all</button>-->
+<div>
+    現在影片撥放時間: <label id="nowflg"></label>
+</div>
+<div class="container" id="ccc" style="display: inline-block;">
+
+    <canvas  id='canvas' style='cursor: pointer;' ></canvas>
+    <div style="z-index: 2;position: absolute; inset: 0px; max-width: 75px; max-height: 75px; margin: auto; opacity: 0.7; cursor: pointer; display: none;" id="butad" onclick="gogo()">
+        <svg style="max-width: 75px; max-height: 75px;" viewBox="0 0 200 200" alt="Play video">
+            <circle cx="100" cy="100" r="90" fill="none" stroke-width="15" stroke="#fff"></circle>
+            <polygon points="70, 55 70, 145 145, 100" fill="#fff"></polygon>
+        </svg>
+    </div>
+    <div class="controls">
+        <button type="button" onclick="snapshot()" id="snapshotBtn"><i class="fas fa-camera"></i></button>
+        <button type="button" id="recordBtn"><i class="fas fa-video"></i></button>
+        <button onclick="gogo()" id="pauseBtn"><i class="fa fa-play"></i><i class="fa fa-pause"></i></button>
+        <button type="button" id="backwardBtn" onclick="addsec(-10)"><i class="fas fa-backward"></i></button>
+
+        <div class="timeline" id="timeline" onclick="gotimelineplay()" style="cursor: pointer">
+            <div class="bar">
+
+                <div class="inner" id="videoline"></div>
+                <div class="inner2" id="mouseline"></div>
+                <label id="mousetime" style="color: white"></label>
+            </div>
+        </div>
+        <button type="button" id="forwardBtn" onclick="addsec(10)"><i class="fas fa-forward"></i></button>
+        <button onclick="fullScreen()" id="fullScreenBtn"><i class="fa fa-expand"></i></button>
+        <!--<button onclick="forward(event)"><i class="fas fa-forward"></i></button>
+
+        <button onclick="download(event)"><i class="fa fa-cloud-download"></i></button>-->
+    </div>
+</div>
+<br>
+<div class="video-container d-flex align-items-center justify-content-center">
+    <video id="outputVideo" alt="錄好的畫面將會出現在這" muted>Video stream not available.</video>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script type="text/javascript" src="jsmpeg.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
+
+
+
+<script>
+    var VIEWPORT_X = 1280;
+    var VIEWPORT_Y = 720;
+    var TARGET_RATIO = VIEWPORT_X / VIEWPORT_Y;
+    var prevValue = "0";
+    var 撥放類別 = 0;
+    var player;
+    var dvrs = [];
+    var nowplayertime = moment();
+    var 影片時長 = 180;
+    var 增加秒數 = 0;
+    const canvas = document.getElementById("canvas");
+
+    //$('#ttime').val(moment().format('YYYY-MM-DDTHH:mm'));
+    //var dvrs=[];
+    var playerstate = true;
+    document.querySelector(".fa-pause").style.display = "none";
+    $('.controls').hide();
+    var host = "rtspcameratest.ddns.net";
+    var socket = io();
+    //socket.emit('getList', '');
+    var 影片尺寸 = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
+    if (isMobileDevice()) {
+        //console.log("is mobile device");
+        影片尺寸.width = window.innerWidth - 45;
+        影片尺寸.height = (影片尺寸.width / 640) * 640
+    } else {
+
+        影片尺寸.height = window.innerHeight - 100
+        影片尺寸.width = (影片尺寸.height / 480) * 480
+
+
+        // console.log("not mobile device");
+    }
+
+    socket.emit('windowSize', 影片尺寸);
+    socket.on('getList', function (msg) {
+        host = msg.host;
+        if ($("#crar").html() == '') {
+            dvrs = msg.chs;
+            $("#crar").html("");
+            $("#crar").append("<option value='0'></option>")
+            for (var i = 0; i < dvrs.length; i++) {
+                $("#crar").append("<option data-type='" + dvrs[i].ch + "' value='" + dvrs[i].wsPort + "'>ch" + dvrs[i].id + "</option>");
+            }
+        }
+    });
+
+    function isMobileDevice() {
+        let mobileDevices = ['Android', 'webOS', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 'Windows Phone']
+        for (var i = 0; i < mobileDevices.length; i++) {
+            if (navigator.userAgent.match(mobileDevices[i])) {
+                //console.log("isMobileDevice: match " + mobileDevices[i]);
+                return true;
+            }
+        }
+        return false
+    }
+
+    document.getElementById("timeline").addEventListener("mouseout", (event) => {
+        var mouseX = event.clientX;
+        var ttt = ((event.clientX - getPosition(document.getElementById("timeline")).x) / document.getElementById('timeline').getBoundingClientRect().width) * 100
+        document.querySelector('.inner2').style.width = `0%`
+        //document.getElementById("mousetime").scrollLeft=getPosition(document.getElementById("timeline")).x-25
+        //document.getElementById("mousetime").offsetLeft = getPosition(document.getElementById("timeline")).x
+        //$('#mousetime').offsetLeft(getPosition(document.getElementById("timeline")).x)
+        $('#mousetime').css({"position": "absolute", "left": "0px"});
+        $('#mousetime').html("");
+
+
+    });
+    document.getElementById("timeline").addEventListener("mousemove", (event) => {
+        var mouseX = event.clientX;
+        var ttt = ((event.clientX - getPosition(document.getElementById("timeline")).x) / document.getElementById('timeline').getBoundingClientRect().width) * 100
+        if ($('#ttime').val() != '') {
+            document.querySelector('.inner2').style.width = `${ttt}%`
+            if (event.clientX < $('#mousetime').width() + getPosition(document.getElementById("timeline")).x) {
+                $('#mousetime').css({"position": "absolute", "left": getPosition(document.getElementById("timeline")).x + $('#mouseline').width() + "px"});
+            } else {
+                $('#mousetime').css({"position": "absolute", "left": getPosition(document.getElementById("timeline")).x + $('#mouseline').width() - $('#mousetime').width() - $('#mousetime').width() / 2 + "px"});
+            }
+            var 滑屬所在百分比 = ($('#mouseline').width() / $('#timeline').width()) * 100;
+            var 預計增加秒數 = (滑屬所在百分比 / 100) * 影片時長;
+            $('#mousetime').html(moment(new Date($('#ttime').val())).add(預計增加秒數, 'seconds').format('HH:mm:ss'))
+        }
+
+    });
+
+    function gotimelineplay() {
+        var 滑屬所在百分比 = ($('#mouseline').width() / $('#timeline').width()) * 100;
+        var 預計增加秒數 = (滑屬所在百分比 / 100) * 影片時長;
+        增加秒數 = 預計增加秒數
+        var temp = moment(new Date($('#ttime').val())).add(預計增加秒數, 'seconds');
+        //$('#ttime').val(temp.format('YYYY-MM-DD HH:mm:ss'))
+        撥放摄影機(temp.toDate());
+        $('.controls').show()
+    }
+
+    function getPosition(element) {
+        var x = 0;
+        var y = 0;
+        // 搭配上面的示意圖可比較輕鬆理解為何要這麼計算
+        while (element) {
+            x += element.offsetLeft - element.scrollLeft + element.clientLeft;
+            y += element.offsetTop - element.scrollLeft + element.clientTop;
+            element = element.offsetParent;
+        }
+
+        return {x: x, y: y};
+    }
+
+
+    function fl2(){
+        resizeCanvas()
+    }
+
+    function fullScreen() {
+        var doc = window.document;
+        var docEl = document.getElementById("canvas");
+
+
+
+
+        //var requestFullScreen = document.getElementById('canvas').requestFullscreen || document.getElementById('canvas').mozRequestFullScreen || document.getElementById('canvas').webkitRequestFullscreen || document.getElementById('canvas').msRequestFullscreen;
+        //requestFullScreen.call(document.getElementById('canvas'));
+        //document.getElementById('canvas').webkitRequestFullScreen();
+        //alert("");
+
+//doc.documentElement;
+
+        var requestFullScreen = docEl.requestFullscreen || docEl.webkitIsFullScreen || docEl.mozRequestFullScreen ;
+        var cancelFullScreen = doc.exitFullscreen  || doc.webkitExitFullscreen ;
+
+        if(!doc.fullscreenElement &&  !doc.webkitFullscreenElement ){
+            requestFullScreen.call(docEl);
+        } else {
+            cancelFullScreen.call(doc);
+        }
+    }
+
+
+
+    function mouseleave() {
+        if (!playerstate) {
+            $('#butad').show()
+        }
+    }
+
+    function gogo() {
+        //socket.emit('chastart', dvrs[parseInt(start) - 1]);
+        var start = $("#crar option[value='" + $("#crar").val() + "']").index();
+        if (playerstate) {
+            player.pause();
+            playerstate = false;
+            $('#butad').show();
+            socket.emit('suspend', dvrs[parseInt(start) - 1]);
+            //document.querySelector(".fa-play").style.display = "block"
+            //document.querySelector(".fa-pause").style.display = "none"
+            document.querySelector(".fa-play").style.display = "block"
+            document.querySelector(".fa-pause").style.display = "none"
+        } else {
+            player.play();
+            playerstate = true;
+            $('#butad').hide();
+            socket.emit('resume', dvrs[parseInt(start) - 1]);
+            //document.querySelector(".fa-play").style.display = "none"
+            //document.querySelector(".fa-pause").style.display = "block"
+            document.querySelector(".fa-play").style.display = "none"
+            document.querySelector(".fa-pause").style.display = "block"
+        }
+    }
+
+    function img() {
+        //http://114.32.25.15/cgi-bin/net_jpeg.cgi?ch=0
+        var ctx = document.getElementById('canvas');
+        if (ctx.getContext) {
+
+            ctx = ctx.getContext('2d');
+
+            //Loading of the home test image - img1
+            var img1 = new Image();
+
+            //drawing of the test image - img1
+            img1.onload = function () {
+                //draw background image
+                ctx.drawImage(img1, 0, 0);
+                //draw a box over the top
+                ctx.fillStyle = "rgba(200, 0, 0, 0.5)";
+                ctx.fillRect(0, 0, 500, 500);
+
+            };
+            url = 'http://admin:a11111@114.32.25.15/cgi-bin/net_jpeg.cgi?ch=' + parseInt(parseInt($("#crar option[value='" + $("#crar").val() + "']").attr("data-type")) - 1);
+            console.log(url);
+            img1.src = url;
+        }
+
+        //img.src = 'http://114.32.25.15/cgi-bin/net_jpeg.cgi?ch='+parseInt($("#crar option[value='" + $("#crar").val() + "']").attr("data-type"))-1;
+    }
+
+    function changesource(url) {
+
+        var video = $("#vid1");
+        video.src = url;
+        document.getElementById('vid1').src = url;
+
+
+    }
+
+    function pl1() {
+        if ($("#crar").val() == '0') {
+            //player.stop();
+        } else {
+            撥放類別 = 1;
+            $('#forwardBtn').hide();
+            $('#timeline').hide();
+            $('#backwardBtn').hide();
+
+            撥放摄影機();
+            $('#ttime').val("")
+            //$('.controls').hide();
+            //$("button[data-type='control']").hide();
+            if (canvas.requestFullscreen) {
+
+            } else {
+                $('#fullScreenBtn').hide()
+            }
+        }
+
+    }
+
+    function pl2() {
+        if ($("#crar").val() == '0') {
+            //player.stop();
+        } else {
+
+            if (new Date($('#ttime').val()).getTime() < new Date().getTime()) {
+                撥放類別 = 0;
+                增加秒數 = 0;
+                $('#forwardBtn').show();
+                $('#timeline').show();
+                $('#backwardBtn').show();
+                $('#fullScreenBtn').show()
+                撥放摄影機(new Date($('#ttime').val()));
+
+                //$('.controls').show();
+                //$("button[data-type='control']").show();
+            } else {
+                alert("不可大於現在!");
+            }
+            if (canvas.requestFullscreen) {
+
+            } else {
+                $('#fullScreenBtn').hide()
+            }
+
+
+        }
+
+    }
+
+    function 撥放摄影機(撥放時間) {
+        var stop = $("#crar option[value='" + prevValue + "']").index();
+        var start = $("#crar option[value='" + $("#crar").val() + "']").index();
+        var playback = '';
+        if (撥放時間 != undefined) {
+            if (撥放時間 != "") {
+                var b = Math.floor(撥放時間.getTime() / 1000);
+                playback = '&beg=' + b;
+            }
+        }
+        var c = $("#crar option[value='" + $("#crar").val() + "']").attr("data-type");
+        dvrs[parseInt(start) - 1].url = dvrs[parseInt(start) - 1].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+        socket.emit('chastop', dvrs[parseInt(stop) - 1]);
+        socket.emit('chastart', dvrs[parseInt(start) - 1]);
+        player = new JSMpeg.Player('ws://' + host + ':' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort, {
+            canvas: document.getElementById('canvas'),
+            audio: false, autoplay: true,
+            decodeFirstFrame: true, preserveDrawingBuffer: true,
+            isPalying: false,
+            onPlay: () => {
+                $('.controls').show();
+                this.isPalying = true
+            },
+            onPause: () => {
+                this.isPalying = false
+            },
+            onStalled: () => {
+                this.isPalying = false
+            },
+            onVideoDecode: () => {
+                //console.log(player.currentTime)
+                if (撥放類別 == 0) {
+                    let curr = ((player.currentTime + 增加秒數) / 影片時長) * 100
+                    document.querySelector('.inner').style.width = `${curr}%`
+                    if (curr > 80) {
+                        影片時長 = 影片時長 + 影片時長;
+                    }
+                    var date = new Date($('#ttime').val());
+                    nowplayertime = moment(date).add((player.currentTime + 增加秒數), 'seconds');
+                    $("#nowflg").html(nowplayertime.format('YYYY-MM-DD HH:mm:ss'));
+                }
+            }
+        })
+        playerstate = true;
+        //document.querySelector(".fa-play").style.display = "none"
+        //document.querySelector(".fa-pause").style.display = "block"
+        //myPlayer.src({ type: "application/x-mpegURL", src: 'ws://localhost:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort });
+        // myPlayer.play();
+        document.querySelector(".fa-play").style.display = "none"
+        document.querySelector(".fa-pause").style.display = "block"
+    }
+
+    //var myPlayer = videojs('my_video_1');
+    function pl() {
+        if ($("#crar").val() == '0') {
+            //player.stop();
+        } else {
+            var stop = $("#crar option[value='" + prevValue + "']").index();
+            var start = $("#crar option[value='" + $("#crar").val() + "']").index();
+            var playback = '';
+            if ($('#ttime').val() != '') {
+                var date = new Date($('#ttime').val());
+                var b = Math.floor(date.getTime() / 1000);
+                playback = '&beg=' + b;
+            }
+            var c = $("#crar option[value='" + $("#crar").val() + "']").attr("data-type");
+            dvrs[parseInt(start) - 1].url = dvrs[parseInt(start) - 1].url + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+            socket.emit('chastop', dvrs[parseInt(stop) - 1]);
+            socket.emit('chastart', dvrs[parseInt(start) - 1]);
+            player = new JSMpeg.Player('ws://rtspcameratest.ddns.net:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort, {
+                canvas: document.getElementById('canvas'),
+                audio: false, autoplay: true,
+                decodeFirstFrame: true, preserveDrawingBuffer: true,
+                isPalying: false,
+                onPlay: () => {
+                    this.isPalying = true
+                },
+                onPause: () => {
+                    this.isPalying = false
+                },
+                onStalled: () => {
+                    this.isPalying = false
+                },
+                onVideoDecode: () => {
+                    console.log(player.currentTime)
+
+                    let curr = (player.currentTime / 影片時長) * 100
+                    document.querySelector('.inner').style.width = `${curr}%`
+
+                    if (curr > 80) {
+                        影片時長 = 影片時長 + 影片時長;
+                    }
+
+                    var date = new Date($('#ttime').val());
+                    nowplayertime = moment(date).add(player.currentTime, 'seconds');
+                    //var b = Math.floor(date.getTime() / 1000);
+                    $("#nowflg").html(nowplayertime.format('YYYY-MM-DD HH:mm:ss'));
+                }
+            })
+            playerstate = true;
+            //document.querySelector(".fa-play").style.display = "none"
+            //document.querySelector(".fa-pause").style.display = "block"
+            //myPlayer.src({ type: "application/x-mpegURL", src: 'ws://localhost:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort });
+            // myPlayer.play();
+            document.querySelector(".fa-play").style.display = "none"
+            document.querySelector(".fa-pause").style.display = "block"
+        }
+    }
+
+    function addsec(sec) {
+        增加秒數 = 增加秒數 + sec
+        let curr = ((player.currentTime + 增加秒數) / 影片時長) * 100
+        document.querySelector('.inner').style.width = `${curr}%`
+
+        var date = new Date($('#ttime').val());
+        nowplayertime = moment(date).add((player.currentTime + 增加秒數), 'seconds');
+        $("#nowflg").html(nowplayertime.format('YYYY-MM-DD HH:mm:ss'));
+
+
+        //增加秒數 = 增加秒數 + sec
+        //nowplayertime.add(sec, 'seconds')
+        //$('#ttime').val(nowplayertime.format('YYYY-MM-DD HH:mm:ss'))
+        撥放摄影機(nowplayertime.toDate());
+    }
+
+
+    function changech(obj) {
+
+        var newValue = obj.value;
+        var stop = $("#crar option[value='" + prevValue + "']").index();
+        var start = $("#crar option[value='" + obj.value + "']").index();
+
+        console.log(stop)
+        console.log(start)
+
+        if (start == '0') {
+            player.stop();
+            socket.emit('chastop', dvrs[parseInt(stop) - 1]);
+        } else {
+            var date = new Date($('#ttime').val());
+            var b = Math.floor(date.getTime() / 1000);
+            dvrs[parseInt(start) - 1].url = dvrs[parseInt(start) - 1].url + "&beg=" + b;
+            if (stop == '0')
+                socket.emit('chastop', dvrs[parseInt(stop) - 1]);
+            socket.emit('chastart', dvrs[parseInt(start) - 1]);
+            player = new JSMpeg.Player('ws://rtspcameratest.ddns.net:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort, {canvas: document.getElementById('canvas'), audio: false, autoplay: false, decodeFirstFrame: true})
+
+        }
+
+
+        prevValue = newValue;
+
+    }
+
+
+    const recordBtn = document.getElementById("recordBtn");
+
+    let recording = false;
+    let mediaRecorder;
+    let recordedChunks;
+
+    recordBtn.addEventListener("click", () => {
+
+
+        recording = !recording;
+        if (recording) {
+            //recordBtn.textContent = "Stop";
+            recordBtn.style.color = "red";
+            const stream = canvas.captureStream(25);
+            mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm',
+                ignoreMutedMedia: true
+            });
+            recordedChunks = [];
+            mediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+            mediaRecorder.start();
+        } else {
+            //recordBtn.textContent = "Record"
+            recordBtn.style.color = "";
+            mediaRecorder.stop();
+            setTimeout(() => {
+                const blob = new Blob(recordedChunks, {
+                    type: "video/webm"
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "recording.webm";
+                a.click();
+                URL.revokeObjectURL(url);
+
+
+                outputVideoURL = URL.createObjectURL(blob)
+                document.querySelector('#outputVideo').src = outputVideoURL
+            }, 0);
+        }
+
+
+    });
+    function resizeCanvas() {
+        var context = canvas.getContext("2d");
+        // This function resizes the canvas,
+        //  but tries to maintain the targetRatio (above).
+        if ((window.innerWidth / window.innerHeight) > TARGET_RATIO) {
+            // window is too wide
+            canvas.height = window.innerHeight;
+            canvas.width = canvas.height * TARGET_RATIO;
+            canvas.style.top = "0px";
+            canvas.style.left = ((window.innerWidth - canvas.width) / 2) + "px";
+        } else {
+            canvas.width = window.innerWidth;
+            canvas.height = canvas.width / TARGET_RATIO;
+            canvas.style.top = ((window.innerHeight - canvas.height) / 2) + "px";
+            canvas.style.left = "0px";
+        }
+
+        // This next block zooms the canvas,
+        //  so keep all your draw calls inside VIEWPORT_X or Y and it should Just Work.
+        // Note that changing canvas.width or canvas.height also
+        //  * clears the canvas, and * resets the transformation matrix.
+        var zoom = canvas.height / VIEWPORT_Y;
+        context.scale(zoom,zoom);
+    }
+
+</script>
+
+<script>
+
+
+    /**
+     * 截图
+     * @param {string} name
+     */
+    function snapshot() {
+        // img.src = player.canvas.toDataURL('image/jpeg');
+        //window.location.href = img.src
+        const mime = 'image/png';
+        url = document.getElementById("canvas").toDataURL(mime)
+
+        saveToLocal(url.replace(mime, 'image/octet-stream'), moment().format('YYYY-MM-DDTHH:mm') + '.png', mime)
+
+    }
+
+    // saveToLocal方法如下
+    /**
+     *
+     * @param {object} param
+     * @param {string|object|Array} param.data 数据，传入后url参数将被忽略
+     * @param {string} param.url 文件下载地址
+     * @param {string} param.name 文件名称
+     * @param {string} param.mimeType 文件mime类型
+     * @returns
+     */
+    function saveToLocal(blob, name, mimeType) {
+        if (!blob) return
+
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.download = name
+        if (typeof blob === 'string') {
+            a.href = blob
+        } else {
+            blob =
+                blob instanceof Blob
+                    ? blob
+                    : new Blob(blob instanceof Array ? blob : [blob], {
+                        type: mimeType
+                    })
+            a.href = URL.createObjectURL(blob)
+        }
+
+        setTimeout(() => {
+            a.click()
+        }, 0)
+        setTimeout(() => {
+            a.remove()
+        }, 1)
+
+        if (blob instanceof Blob) {
+            setTimeout(() => {
+                URL.revokeObjectURL(blob)
+            }, 1000)
+        }
+    }
+
+
+</script>
+</html>

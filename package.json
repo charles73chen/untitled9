@@ -1,0 +1,21 @@
+{
+  "name": "localhost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rtsp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "hls-server": "^1.5.0",
+    "log4js": "^6.9.1",
+    "node-onvif": "^0.1.7",
+    "node-rtsp-stream-jsmpeg": "0.0.2",
+    "ntsuspend": "^1.0.2",
+    "portfinder": "^1.0.32",
+    "socket.io": "^4.7.2"
+  }
+}
