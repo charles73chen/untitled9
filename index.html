@@ -1,0 +1,203 @@
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>攝影機串流</title>
+</head>
+<body>
+<div id="app">
+    <label id="sessionId" style="display: none"></label><br><label id="source" style="display: none"></label><br>
+    <input type="datetime-local" id="ttime">
+    <select id="crar"></select>
+    <button type="button" id="load" onclick="p1()">即時</button>
+    <button type="button" id="load2" onclick="p2()">回放</button>
+    <button type="button" id="load3" onclick="p3()">輪播</button>
+    <button type="button" id="recordBtn">錄影</button>
+    <button type="button" onclick="capture()">截圖</button>
+    <label style="margin-left: 5px"></label>Loading:<label id="time"></label>
+    <br><br>
+    <video controls id="video" autoplay></video>
+    <br>
+    <br>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.1/dist/loadingoverlay.min.js"></script>
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
+<script src="JS/rtsp.js"></script>
+<script>
+    const video = document.getElementById('video');
+    const $crar = $("#crar");
+    const $tiem = $('#time')
+    var host = "";
+    var socket = io();
+    var sessionID = "";
+    var startDate = "";
+    var refreshIntervalId ;
+    if (Hls.isSupported()) {
+        var hls = new Hls();
+    }
+
+    function 撥放摄影機(撥放時間) {
+        var start = $("#crar option:selected").index();
+        var playback = '';
+        if (撥放時間 != undefined) {
+            if (撥放時間 != "") {
+                var b = Math.floor(撥放時間.getTime() / 1000);
+                playback = '&beg=' + b;
+            }
+        }
+        var c = $("#crar option:selected").attr("data-type");
+        dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+        dvrs[parseInt(start)].sessionID = sessionID;
+        socket.emit('play', dvrs[parseInt(start)]);
+    }
+
+    
+
+    socket.on('sessionID', function (msg) {
+        if ($('#sessionId').html() == '') {
+            sessionID = msg;
+            $('#sessionId').html(sessionID);
+        }
+    });
+    socket.on('getList', function (msg) {
+        host = msg.host;
+        if ($crar.html() == '') {
+            dvrs = msg.chs;
+            $crar.html("");
+            for (var i = 0; i < dvrs.length; i++) {
+                $crar.append("<option data-type='" + dvrs[i].ch + "' value='" + dvrs[i].wsPort + "'>ch" + dvrs[i].id + "</option>");
+            }
+        }
+    });
+    socket.on('loadc', function (msg) {
+        if (msg.sessionID === sessionID) {
+            clearInterval(refreshIntervalId);
+            $.LoadingOverlay("hide");
+            $tiem.html(moment().diff(startDate,"milliseconds") + "ms");
+            refreshIntervalId = setTimeout(function () {
+                location.reload();//10分鐘後畫面重整
+            }, 1000 * 60 * 10)
+            if (Hls.isSupported()) {
+                //$('#source').html("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8")
+                hls.loadSource("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8");
+                hls.attachMedia(video);
+                $tiem.html(moment().diff(startDate,"milliseconds") + "ms");
+                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    video.muted = true;
+                    video.play();
+                    if (isMobileDevice()) {
+                        video.style.width = window.innerWidth - 45;
+                    }
+                });
+            } else {
+                video.src = "http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8";
+                setTimeout(function () {
+                    video.play();
+                    if (isMobileDevice()) {
+                        video.style.width = window.innerWidth - 45;
+                    }
+                }, 2000)
+            }
+        }
+    });
+
+    function isMobileDevice() {
+        let mobileDevices = ['Android', 'webOS', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 'Windows Phone']
+        for (var i = 0; i < mobileDevices.length; i++) {
+            if (navigator.userAgent.match(mobileDevices[i])) {
+                return true;
+            }
+        }
+        return false
+    }
+
+
+    const recordBtn = document.getElementById("recordBtn");
+    let recording = false;
+    let mediaRecorder;
+    let recordedChunks;
+
+    recordBtn.addEventListener("click", () => {
+        recording = !recording;
+        if (recording) {
+            recordBtn.style.color = "red";
+            const stream = video.captureStream(25);
+            mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm',
+                ignoreMutedMedia: true
+            });
+            recordedChunks = [];
+            mediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+            mediaRecorder.start();
+        } else {
+            recordBtn.style.color = "";
+            mediaRecorder.stop();
+            setTimeout(() => {
+                const blob = new Blob(recordedChunks, {
+                    type: "video/webm"
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "recording_" + moment().format('YYYY-MM-DDTHH:mm') + ".webm";
+                a.click();
+                URL.revokeObjectURL(url);
+                outputVideoURL = URL.createObjectURL(blob)
+                document.querySelector('#outputVideo').src = outputVideoURL
+            }, 0);
+        }
+    });
+
+    function capture() {
+        var canvas = document.createElement("canvas");
+        var video = document.querySelector("video");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas
+            .getContext("2d")
+            .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        saveToLocal(canvas.toDataURL('image/jpeg'), moment().format('YYYY-MM-DDTHH:mm') + '.png', 'image/octet-stream');
+
+    }
+
+    function saveToLocal(blob, name, mimeType) {
+        if (!blob) return
+
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.download = name
+        if (typeof blob === 'string') {
+            a.href = blob
+        } else {
+            blob =
+                blob instanceof Blob
+                    ? blob
+                    : new Blob(blob instanceof Array ? blob : [blob], {
+                        type: mimeType
+                    })
+            a.href = URL.createObjectURL(blob)
+        }
+
+        setTimeout(() => {
+            a.click()
+        }, 0)
+        setTimeout(() => {
+            a.remove()
+        }, 1)
+
+        if (blob instanceof Blob) {
+            setTimeout(() => {
+                URL.revokeObjectURL(blob)
+            }, 1000)
+        }
+    }
+</script>
+</body>
+</html>
