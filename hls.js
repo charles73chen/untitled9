@@ -7,7 +7,7 @@
  supervisor -g ./source-m3u8,./log,*.html hls.js
  */
 
-
+ let ServerSetting = require("./config.js")
 const HLSServer = require('hls-server');
 const fs = require("fs");
 var log4js = require("log4js");
@@ -15,17 +15,6 @@ const http = require('http');
 const child_process = require("child_process");
 const url = require("url");
 const os = require("os");
-let ServerSetting  = {
-    host: "rtspcameratest.ddns.net",
-    port: 8080,
-    serverPort:3000,
-    username: "admin",
-    userpass: "abcd1234",
-    videoWidth: 640,
-    videoHeight: 360,
-    camerLength: 32,
-    線程: os.cpus().length
-};
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.host};
 let dvrs = [];
@@ -124,7 +113,7 @@ io.on("connection", async (socket) => {
 
             }
             var filename = "./"+轉檔目錄+"/" +  socket.id + ".m3u8"
-            obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.host + ":" + ServerSetting.port + obj.url
+            obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
 
             global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url, "-profile:v", "baseline", '-b:v', '100K', '-level',
                 "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
@@ -145,12 +134,12 @@ io.on("connection", async (socket) => {
 
             global[ socket.id].stdout.setEncoding('utf8');
             global[ socket.id].stdout.on('data', function(data) {
-                logger.info('stdout: ' + data);
+                logger.info( data);
             });
 
             global[ socket.id].stderr.setEncoding('utf8');
             global[ socket.id].stderr.on('data', function(data) {
-                logger.info('stderr: ' + data);
+                logger.info( data);
             });
         //}
     });
