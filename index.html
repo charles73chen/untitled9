@@ -50,17 +50,17 @@
         }
         var c = $("#crar option:selected").attr("data-type");
         dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
-        dvrs[parseInt(start)].sessionID = sessionID;
+        dvrs[parseInt(start)].sessionID = socket.id;
         socket.emit('play', dvrs[parseInt(start)]);
     }
 
     
 
     socket.on('sessionID', function (msg) {
-        if ($('#sessionId').html() == '') {
-            sessionID = msg;
-            $('#sessionId').html(sessionID);
-        }
+        //if ($('#sessionId').html() == '') {
+        //    sessionID = msg;
+            $('#sessionId').html(socket.id);
+        //}
     });
     socket.on('getList', function (msg) {
         host = msg.host;
@@ -73,7 +73,7 @@
         }
     });
     socket.on('loadc', function (msg) {
-        if (msg.sessionID === sessionID) {
+        if (msg.sessionID === socket.id) {
             clearInterval(refreshIntervalId);
             $.LoadingOverlay("hide");
             $tiem.html(moment().diff(startDate,"milliseconds") + "ms");
@@ -82,9 +82,8 @@
             }, 1000 * 60 * 10)
             if (Hls.isSupported()) {
                 //$('#source').html("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8")
-                hls.loadSource("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8");
+                hls.loadSource("http://" + host + ":3000/streams/" + socket.id + ".m3u8");
                 hls.attachMedia(video);
-                $tiem.html(moment().diff(startDate,"milliseconds") + "ms");
                 hls.on(Hls.Events.MEDIA_ATTACHED, function () {
                     video.muted = true;
                     video.play();
@@ -93,7 +92,7 @@
                     }
                 });
             } else {
-                video.src = "http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8";
+                video.src = "http://" + host + ":3000/streams/" + socket.id + ".m3u8";
                 setTimeout(function () {
                     video.play();
                     if (isMobileDevice()) {
@@ -104,15 +103,7 @@
         }
     });
 
-    function isMobileDevice() {
-        let mobileDevices = ['Android', 'webOS', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 'Windows Phone']
-        for (var i = 0; i < mobileDevices.length; i++) {
-            if (navigator.userAgent.match(mobileDevices[i])) {
-                return true;
-            }
-        }
-        return false
-    }
+    
 
 
     const recordBtn = document.getElementById("recordBtn");
@@ -155,49 +146,7 @@
         }
     });
 
-    function capture() {
-        var canvas = document.createElement("canvas");
-        var video = document.querySelector("video");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas
-            .getContext("2d")
-            .drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        saveToLocal(canvas.toDataURL('image/jpeg'), moment().format('YYYY-MM-DDTHH:mm') + '.png', 'image/octet-stream');
-
-    }
-
-    function saveToLocal(blob, name, mimeType) {
-        if (!blob) return
-
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.download = name
-        if (typeof blob === 'string') {
-            a.href = blob
-        } else {
-            blob =
-                blob instanceof Blob
-                    ? blob
-                    : new Blob(blob instanceof Array ? blob : [blob], {
-                        type: mimeType
-                    })
-            a.href = URL.createObjectURL(blob)
-        }
-
-        setTimeout(() => {
-            a.click()
-        }, 0)
-        setTimeout(() => {
-            a.remove()
-        }, 1)
-
-        if (blob instanceof Blob) {
-            setTimeout(() => {
-                URL.revokeObjectURL(blob)
-            }, 1000)
-        }
-    }
+    
 </script>
 </body>
 </html>

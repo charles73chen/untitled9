@@ -7,7 +7,7 @@
  supervisor -g ./source-m3u8,./log,*.html hls.js
  */
 
-let ServerSetting = require("./config.js");
+
 const HLSServer = require('hls-server');
 const fs = require("fs");
 var log4js = require("log4js");
@@ -15,11 +15,21 @@ const http = require('http');
 const child_process = require("child_process");
 const url = require("url");
 const os = require("os");
+let ServerSetting  = {
+    host: "rtspcameratest.ddns.net",
+    port: 8080,
+    serverPort:3000,
+    username: "admin",
+    userpass: "abcd1234",
+    videoWidth: 640,
+    videoHeight: 360,
+    camerLength: 32,
+    線程: os.cpus().length
+};
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.host};
 let dvrs = [];
 let 轉檔目錄='source-m3u8';
-let 線程= os.cpus().length;
 log4js.configure({
     appenders: {
         app: {type: 'dateFile', filename: './log/hls', pattern: 'yyyy-MM-dd.log', alwaysIncludePattern: true},
@@ -47,7 +57,7 @@ for (var i = 1; i <= ServerSetting.camerLength; i++) {
     for (j = 1; j < i; j++) {
         k = k + "0";
     }
-    dvrs.push({id: i, wsPort: 6000 + (i * 3), rtspch: "main_0", chname: '', ch: ("1" + k).padStart(8, "0")})
+    dvrs.push({id: i, wsPort: 6000 + (i * 3), rtspch: "main_0", chname: '', ch: ("1" + k).padStart(32, "0")})
 }
 for (i = 0; i < dvrs.length; i++) {
     //串流啟動參數,&audio=1&iframe=1&pframe=1
@@ -77,10 +87,10 @@ const server = http.createServer((req, res) => {
 });
 const hls = new HLSServer(server, {
     path: '/streams', // Base URI to output HLS streams
-    dir: 'source-m3u8', // Directory that input files are stored
+    dir: 轉檔目錄, // Directory that input files are stored
 });
 
-server.listen(3000);
+server.listen(ServerSetting.serverPort);
 const io = require("socket.io")(server, {});
 let sessionID = "";
 io.on("connection", async (socket) => {
@@ -117,7 +127,7 @@ io.on("connection", async (socket) => {
             obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.host + ":" + ServerSetting.port + obj.url
 
             global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url, "-profile:v", "baseline", '-b:v', '100K', '-level',
-                "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", 線程,
+                "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
                 "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40, "-f", "hls", filename], {
                 detached: false
             });
