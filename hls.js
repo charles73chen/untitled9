@@ -17,6 +17,7 @@ const url = require("url");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.host};
 let dvrs = [];
+let 轉檔目錄='source-m3u8';
 log4js.configure({
     appenders: {
         app: {type: 'dateFile', filename: './log/hls', pattern: 'yyyy-MM-dd.log', alwaysIncludePattern: true},
@@ -26,13 +27,13 @@ log4js.configure({
 });
 var logger = log4js.getLogger('hls');
 try {
-    fs.readdir('./source-m3u8', function (err, files) {
+    fs.readdir('./'+轉檔目錄, function (err, files) {
         if (err) {
-            fs.promises.mkdir('./source-m3u8', { recursive: true });
+            fs.promises.mkdir('./'+轉檔目錄, { recursive: true });
             return console.log('Unable to scan directory: ' + err);
         }
         files.forEach(function (file) {
-            filePath = './source-m3u8/' + file;
+            filePath = './'+轉檔目錄+'/' + file;
             fs.unlinkSync(filePath);
         });
     });
@@ -94,14 +95,14 @@ io.on("connection", async (socket) => {
             } catch (e) {
             }
             try {
-                fs.readdir('./source-m3u8', function (err, files) {
+                fs.readdir('./'+轉檔目錄, function (err, files) {
                     if (err) {
-                        fs.promises.mkdir('./source-m3u8', { recursive: true });
+                        fs.promises.mkdir('./'+轉檔目錄, { recursive: true });
                         return console.log('Unable to scan directory: ' + err);
                     }
                     files.forEach(function (file) {
                         if (file.startsWith(obj.sessionID)) {
-                            filePath = './source-m3u8/' + file;
+                            filePath = './'+轉檔目錄+'/' + file;
                             fs.unlinkSync(filePath);
                         }
                     });
@@ -110,7 +111,7 @@ io.on("connection", async (socket) => {
             } catch (e) {
 
             }
-            var filename = "./source-m3u8/" +  socket.id + ".m3u8"
+            var filename = "./"+轉檔目錄+"/" +  socket.id + ".m3u8"
             obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.host + ":" + ServerSetting.port + obj.url
 
             global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url, "-profile:v", "baseline", '-b:v', '100K', '-level',
@@ -159,7 +160,7 @@ io.on("connection", async (socket) => {
                 }
                 files.forEach(function (file) {
                     if (file.startsWith( socket.id)) {
-                        filePath = './source-m3u8/' + file;
+                        filePath = './'+轉檔目錄+'/' + file;
                         fs.unlinkSync(filePath);
                     }
                 });
