@@ -15,6 +15,7 @@
     "node-onvif": "^0.1.7",
     "node-rtsp-stream-jsmpeg": "0.0.2",
     "ntsuspend": "^1.0.2",
+    "os": "^0.1.2",
     "portfinder": "^1.0.32",
     "socket.io": "^4.7.2"
   }

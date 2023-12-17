@@ -14,10 +14,12 @@ var log4js = require("log4js");
 const http = require('http');
 const child_process = require("child_process");
 const url = require("url");
+const os = require("os");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.host};
 let dvrs = [];
 let 轉檔目錄='source-m3u8';
+let 線程= os.cpus().length;
 log4js.configure({
     appenders: {
         app: {type: 'dateFile', filename: './log/hls', pattern: 'yyyy-MM-dd.log', alwaysIncludePattern: true},
@@ -115,7 +117,7 @@ io.on("connection", async (socket) => {
             obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.host + ":" + ServerSetting.port + obj.url
 
             global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url, "-profile:v", "baseline", '-b:v', '100K', '-level',
-                "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", 4,
+                "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", 線程,
                 "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40, "-f", "hls", filename], {
                 detached: false
             });
