@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="jMuxer - a simple javascript mp4 muxer for non-standard streaming communications protocol">
+    <meta name="keywords" content="h264 player, mp4 player, mse, mp4 muxing, jmuxer, aac player">
+    <title>jMuxer demo</title>
+</head>
+<body>
+<select id="crar" ></select><button onclick="pl()">Play</button>
+<div id="container" style="margin: 0 auto; text-align: center;">
+    <video style="border: 1px solid #333; max-width: 500px;" controls autoplay poster="images/loader-thumb.jpg" id="player"></video>
+</div>
+<script>
+    function parse(data) {
+        var input = new Uint8Array(data),
+            dv = new DataView(input.buffer),
+            duration,
+            audioLength,
+            audio,
+            video;
+
+        duration = dv.getUint16(0, true);
+        audioLength = dv.getUint16(2, true);
+        audio = input.subarray(4, (audioLength + 4));
+        video = input.subarray(audioLength + 4);
+
+        return {
+            audio: audio,
+            video: video,
+            duration: duration
+        };
+    }
+    /*
+    window.onload = function() {
+        var socketURL = 'ws://localhost:8080';
+        var jmuxer = new JMuxer({
+            node: 'player',
+            debug: true,
+            flushingTime: 1000, // we need 1000 for the demo as server provides a chunk data of 1000ms at a time
+            onError: function(data) {
+                console.log('Buffer error encountered', data);
+            },
+            onMissingVideoFrames: function (data) {
+                console.log('Video frames missing', data);
+            },
+            onMissingAudioFrames: function (data) {
+                console.log('Audio frames missing', data);
+            }
+        });
+
+        var ws = new WebSocket(socketURL);
+        ws.binaryType = 'arraybuffer';
+        ws.addEventListener('message',function(event) {
+            var data = parse(event.data);
+            jmuxer.feed(data);
+        });
+
+        ws.addEventListener('error', function(e) {
+            console.log('Socket Error');
+        });
+    }
+*/
+</script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script type="text/javascript" src="jmuxer.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    var prevValue = "0";
+    var player;
+    var dvrs = [];
+    //$('#ttime').val(moment().format('YYYY-MM-DDTHH:mm'));
+    //var dvrs=[];
+    var playerstate = true;
+    var socket = io();
+    //socket.emit('getList', '');
+    socket.on('getList', function (msg) {
+
+        if ($("#crar").html() == '') {
+            dvrs = msg;
+            $("#crar").html("");
+            $("#crar").append("<option value='0'></option>")
+            for (var i = 0; i < dvrs.length; i++) {
+                $("#crar").append("<option data-type='" + dvrs[i].ch + "' value='" + dvrs[i].wsPort + "'>ch" + parseInt(dvrs[i].ch,2) + "(" + dvrs[i].name + "_" + dvrs[i].wsPort + ")</option>");
+
+            }
+        }
+    });
+    function pl() {
+        if ($("#crar").val() == '0') {
+            //player.stop();
+        } else {
+            var stop = $("#crar option[value='" + prevValue + "']").index();
+            var start = $("#crar option[value='" + $("#crar").val() + "']").index();
+            var playback = '';
+            if ($('#ttime').val() != '') {
+                var date = new Date($('#ttime').val());
+                var b = Math.floor(date.getTime() / 1000);
+                playback = '&beg=' + b;
+            }
+
+
+            var c = $("#crar option[value='" + $("#crar").val() + "']").attr("data-type");
+            dvrs[parseInt(start) - 1].url = dvrs[parseInt(start) - 1].url + playback + "&audio=" + parseInt(c,2) + "&iframe=" + parseInt(c,2) + "&pframe=" + parseInt(c,2);
+            socket.emit('chastop', dvrs[parseInt(stop) - 1]);
+            socket.emit('chastart', dvrs[parseInt(start) - 1]);
+            //player = new JSMpeg.Player('ws://localhost:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort, {canvas: document.getElementById('canvas'), audio: false, autoplay: true, decodeFirstFrame: true})
+            playerstate = true;
+            //document.querySelector(".fa-play").style.display = "none"
+            //document.querySelector(".fa-pause").style.display = "block"
+            //myPlayer.src({ type: "application/x-mpegURL", src: 'ws://localhost:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort });
+            // myPlayer.play();
+
+            var jmuxer = new JMuxer({
+                node: 'player',
+                debug: true,
+                flushingTime: 1000, // we need 1000 for the demo as server provides a chunk data of 1000ms at a time
+                onError: function(data) {
+                    console.log('Buffer error encountered', data);
+                },
+                onMissingVideoFrames: function (data) {
+                    console.log('Video frames missing', data);
+                },
+                onMissingAudioFrames: function (data) {
+                    console.log('Audio frames missing', data);
+                }
+            });
+
+            var ws = new WebSocket('ws://localhost:' + dvrs[parseInt($("#crar option:selected").index()) - 1].wsPort);
+            ws.binaryType = 'arraybuffer';
+            ws.addEventListener('message',function(event) {
+                var data = parse(event.data);
+                jmuxer.feed(data);
+            });
+
+            ws.addEventListener('error', function(e) {
+                console.log('Socket Error');
+            });
+        }
+    }
+
+
+</script>
+</body>
+</html>

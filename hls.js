@@ -28,6 +28,7 @@ var logger = log4js.getLogger('hls');
 try {
     fs.readdir('./source-m3u8', function (err, files) {
         if (err) {
+            fs.promises.mkdir('./source-m3u8', { recursive: true });
             return console.log('Unable to scan directory: ' + err);
         }
         files.forEach(function (file) {
@@ -95,6 +96,7 @@ io.on("connection", async (socket) => {
             try {
                 fs.readdir('./source-m3u8', function (err, files) {
                     if (err) {
+                        fs.promises.mkdir('./source-m3u8', { recursive: true });
                         return console.log('Unable to scan directory: ' + err);
                     }
                     files.forEach(function (file) {
