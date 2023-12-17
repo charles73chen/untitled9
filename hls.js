@@ -131,22 +131,16 @@ io.on("connection", async (socket) => {
                     clearInterval(refreshIntervalId);
                 })
             }, 200)
-            var scriptOutput = "";
+            //var scriptOutput = "";
 
             global[ socket.id].stdout.setEncoding('utf8');
             global[ socket.id].stdout.on('data', function(data) {
-                console.log('stdout: ' + data);
-
-                data=data.toString();
-                scriptOutput+=data;
+                logger.info('stdout: ' + data);
             });
 
             global[ socket.id].stderr.setEncoding('utf8');
             global[ socket.id].stderr.on('data', function(data) {
-                console.log('stderr: ' + data);
-
-                data=data.toString();
-                scriptOutput+=data;
+                logger.info('stderr: ' + data);
             });
         //}
     });
