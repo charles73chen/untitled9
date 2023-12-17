@@ -1,0 +1,31 @@
+<service>
+	<id>localrtsp.exe</id>
+	<name>localrtsp</name>
+	<description>The daemon app for local-npm</description>
+	<executable>D:\nodejs\node.exe</executable>
+	<argument>--harmony</argument>
+	<argument>D:\居樂\node_modules\node-windows\lib\wrapper.js</argument>
+	<argument>--file</argument>
+	<argument>D:\untitled9\rtsp.js</argument>
+	<argument>--scriptoptions=</argument>
+	<argument>--log</argument>
+	<argument>localrtsp wrapper</argument>
+	<argument>--grow</argument>
+	<argument>0.25</argument>
+	<argument>--wait</argument>
+	<argument>1</argument>
+	<argument>--maxrestarts</argument>
+	<argument>3</argument>
+	<argument>--abortonerror</argument>
+	<argument>n</argument>
+	<argument>--stopparentfirst</argument>
+	<argument>undefined</argument>
+	<logmode>rotate</logmode>
+	<stoptimeout>30sec</stoptimeout>
+	<serviceaccount>
+		<domain>K1204-EP110526</domain>
+		<user>LocalSystem</user>
+		<password></password>
+	</serviceaccount>
+	<workingdirectory>D:\居樂</workingdirectory>
+</service>

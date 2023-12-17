@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c223edae-1c2d-40f7-a25f-dfa084d9996c" name="Changes" comment="1">
+      <change afterPath="$PROJECT_DIR$/daemon/.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/.exe.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.err.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.exe.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.out.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.wrapper.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/daemon/localrtsp.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/favicon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/index3.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rtsp.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/untitled9.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/node_modules/node-rtsp-stream-jsmpeg/src/configs.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/node_modules/node-rtsp-stream-jsmpeg/src/mpeg1muxer.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/node_modules/node-rtsp-stream-jsmpeg/src/videoStream.js" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2Toq5Hg8pbaxUwBhT6LKiru285B" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.index.html.executor": "Debug",
+    "Node.js.hls.js.executor": "Debug",
+    "Node.js.rtsp.js.executor": "Run",
+    "Node.js.test.js.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "D:\\Program Files\\JetBrains\\IntelliJ IDEA 2023.3\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\untitled9" />
+      <recent name="D:\untitled9\node_modules\node-rtsp-stream-jsmpeg\src" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="rtsp.js" type="NodeJSConfigurationType" nameIsGenerated="true" path-to-js-file="rtsp.js" working-dir="$PROJECT_DIR$">
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c223edae-1c2d-40f7-a25f-dfa084d9996c" name="Changes" comment="" />
+      <created>1691719596922</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1691719596922</updated>
+      <workItem from="1691719597947" duration="5715000" />
+      <workItem from="1691731983663" duration="622000" />
+      <workItem from="1691741250603" duration="5340000" />
+      <workItem from="1691974203022" duration="10976000" />
+      <workItem from="1692060494462" duration="65601000" />
+      <workItem from="1692666763716" duration="17000" />
+      <workItem from="1692666797124" duration="71000" />
+      <workItem from="1692666888035" duration="626000" />
+      <workItem from="1692774525606" duration="9111000" />
+      <workItem from="1692863782333" duration="8754000" />
+      <workItem from="1693380581195" duration="8879000" />
+      <workItem from="1693466736926" duration="600000" />
+      <workItem from="1698047160474" duration="2312000" />
+      <workItem from="1701265027243" duration="268000" />
+      <workItem from="1701265450477" duration="813000" />
+      <workItem from="1702186070031" duration="146000" />
+      <workItem from="1702186251366" duration="79000" />
+      <workItem from="1702186351404" duration="4851000" />
+      <workItem from="1702291010038" duration="28245000" />
+      <workItem from="1702361581816" duration="15819000" />
+      <workItem from="1702425485417" duration="76000" />
+      <workItem from="1702425600383" duration="867000" />
+      <workItem from="1702465061606" duration="13961000" />
+      <workItem from="1702566934250" duration="3826000" />
+      <workItem from="1702635536925" duration="6872000" />
+      <workItem from="1702643327067" duration="76000" />
+      <workItem from="1702643423717" duration="32000" />
+      <workItem from="1702643685314" duration="13623000" />
+      <workItem from="1702731221995" duration="768000" />
+    </task>
+    <task id="LOCAL-00001" summary="1">
+      <option name="closed" value="true" />
+      <created>1702731486565</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1702731486565</updated>
+    </task>
+    <task id="LOCAL-00002" summary="1">
+      <option name="closed" value="true" />
+      <created>1702731884093</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1702731884093</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="1" />
+    <option name="LAST_COMMIT_MESSAGE" value="1" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="NodeJSConfigurationType">
+        <watch expression="global[&quot;video&quot; + &quot;_&quot;+sessionID+&quot;_&quot; + obj.wsPort] " />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
