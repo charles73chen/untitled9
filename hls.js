@@ -7,7 +7,7 @@
  supervisor -g ./source-m3u8,./log,*.html hls.js
  */
 
- let ServerSetting = require("./config.js")
+let ServerSetting = require("./config.js")
 const HLSServer = require('hls-server');
 const fs = require("fs");
 var log4js = require("log4js");
@@ -18,7 +18,7 @@ const os = require("os");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.host};
 let dvrs = [];
-let 轉檔目錄='source-m3u8';
+let 轉檔目錄 = 'source-m3u8';
 log4js.configure({
     appenders: {
         app: {type: 'dateFile', filename: './log/hls', pattern: 'yyyy-MM-dd.log', alwaysIncludePattern: true},
@@ -28,13 +28,13 @@ log4js.configure({
 });
 var logger = log4js.getLogger('hls');
 try {
-    fs.readdir('./'+轉檔目錄, function (err, files) {
+    fs.readdir('./' + 轉檔目錄, function (err, files) {
         if (err) {
-            fs.promises.mkdir('./'+轉檔目錄, { recursive: true });
+            fs.promises.mkdir('./' + 轉檔目錄, {recursive: true});
             return console.log('Unable to scan directory: ' + err);
         }
         files.forEach(function (file) {
-            filePath = './'+轉檔目錄+'/' + file;
+            filePath = './' + 轉檔目錄 + '/' + file;
             fs.unlinkSync(filePath);
         });
     });
@@ -84,78 +84,26 @@ const io = require("socket.io")(server, {});
 let sessionID = "";
 io.on("connection", async (socket) => {
     sessionID = socket.id;
-    global[ socket.id] = "";
-    io.emit("sessionID",  socket.id);
+    global[socket.id] = "";
+    io.emit("sessionID", socket.id);
     io.emit("getList", option);
     socket.on("play", function (obj) {
         logger.info(socket.id)
         logger.info(obj)
         //if (sessionID === obj.sessionID) {
-            try {
-                process.kill(global[socket.id].pid);
-            } catch (e) {
-            }
-            try {
-                fs.readdir('./'+轉檔目錄, function (err, files) {
-                    if (err) {
-                        fs.promises.mkdir('./'+轉檔目錄, { recursive: true });
-                        return console.log('Unable to scan directory: ' + err);
-                    }
-                    files.forEach(function (file) {
-                        if (file.startsWith(obj.sessionID)) {
-                            filePath = './'+轉檔目錄+'/' + file;
-                            fs.unlinkSync(filePath);
-                        }
-                    });
-                });
-
-            } catch (e) {
-
-            }
-            var filename = "./"+轉檔目錄+"/" +  socket.id + ".m3u8"
-            obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
-
-            global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url, "-profile:v", "baseline", '-b:v', '100K', '-level',
-                "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
-                "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40, "-f", "hls", filename], {
-                detached: false
-            });
-            var refreshIntervalId = setInterval(function () {
-                fs.readFile(filename, function (error, data) {
-                    if (error) {
-                        logger.info(filename+"------uncomplete");
-                        return
-                    }
-                    io.emit("loadc", {sessionID:  socket.id});
-                    clearInterval(refreshIntervalId);
-                })
-            }, 200)
-            //var scriptOutput = "";
-
-            global[ socket.id].stdout.setEncoding('utf8');
-            global[ socket.id].stdout.on('data', function(data) {
-                logger.info( data);
-            });
-
-            global[ socket.id].stderr.setEncoding('utf8');
-            global[ socket.id].stderr.on('data', function(data) {
-                logger.info( data);
-            });
-        //}
-    });
-    socket.on("disconnect", function () {
         try {
-            process.kill(global[ socket.id].pid);
+            process.kill(global[socket.id].pid);
         } catch (e) {
         }
         try {
-            fs.readdir('./source-m3u8', function (err, files) {
+            fs.readdir('./' + 轉檔目錄, function (err, files) {
                 if (err) {
+                    fs.promises.mkdir('./' + 轉檔目錄, {recursive: true});
                     return console.log('Unable to scan directory: ' + err);
                 }
                 files.forEach(function (file) {
-                    if (file.startsWith( socket.id)) {
-                        filePath = './'+轉檔目錄+'/' + file;
+                    if (file.startsWith(obj.sessionID)) {
+                        filePath = './' + 轉檔目錄 + '/' + file;
                         fs.unlinkSync(filePath);
                     }
                 });
@@ -164,6 +112,58 @@ io.on("connection", async (socket) => {
         } catch (e) {
 
         }
-        global[ socket.id] = null;
+        var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8"
+        obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
+        obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
+        global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", '-b:v', '100K', '-level',
+            "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
+            "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
+            detached: false
+        });
+        var refreshIntervalId = setInterval(function () {
+            fs.readFile(filename, function (error, data) {
+                if (error) {
+                    logger.info(filename + "------uncomplete");
+                    return
+                }
+                io.emit("loadc", {sessionID: socket.id, vidw: obj.view});
+                clearInterval(refreshIntervalId);
+            })
+        }, 200)
+        //var scriptOutput = "";
+
+        global[socket.id].stdout.setEncoding('utf8');
+        global[socket.id].stdout.on('data', function (data) {
+            logger.info(data);
+        });
+
+        global[socket.id].stderr.setEncoding('utf8');
+        global[socket.id].stderr.on('data', function (data) {
+            logger.info(data);
+        });
+        //}
+    });
+    socket.on("disconnect", function () {
+        try {
+            process.kill(global[socket.id].pid);
+        } catch (e) {
+        }
+        try {
+            fs.readdir('./source-m3u8', function (err, files) {
+                if (err) {
+                    return console.log('Unable to scan directory: ' + err);
+                }
+                files.forEach(function (file) {
+                    if (file.startsWith(socket.id)) {
+                        filePath = './' + 轉檔目錄 + '/' + file;
+                        fs.unlinkSync(filePath);
+                    }
+                });
+            });
+
+        } catch (e) {
+
+        }
+        global[socket.id] = null;
     });
 });

@@ -1,55 +1,71 @@
 <html lang="zh-tw">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>攝影機串流</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 
 <body>
-    <div id="app" class="container">
-        <label id="sessionId" style="display: none"></label><br><label id="source" style="display: none"></label><br>
+<div id="app" class="container">
+    <label id="sessionId" style="display: none"></label><br><label id="source" style="display: none"></label><br>
 
-        <div class="row">
-            <div class="col">
-                <input type="datetime-local" id="ttime" class="form-control">
+    <div class="row">
+        <div class="col">
+            <input type="datetime-local" id="ttime" class="form-control">
+        </div>
+        <div class="col">
+            <select id="crar" class="form-select"></select>
+        </div>
+        <div class="col-6 align-items-center">
+
+
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-primary" id="load" style="width: 100px;" onclick="p1()">即時</button>
+                <button type="button" class="btn btn-success" id="load2" onclick="p2()">回放</button>
+                <button type="button" class="btn btn-warning" id="load3" onclick="p3()">輪播</button>
             </div>
-            <div class="col">
-                <select id="crar" class="form-select"></select>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <i class="fas fa-video fa-2x" id="recordBtn" style="cursor: pointer;"></i>
+                <i class="fas fa-camera fa-2x" style="margin-left: 5px;cursor: pointer;" onclick="capture()"></i>
+                <!--<button type="button" class="btn btn-primary" id="recordBtn">錄影</button>
+                <button type="button" class="btn btn-success" >截圖</button>-->
             </div>
-            <div class="col-6 align-items-center">
 
 
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <button type="button" class="btn btn-primary" id="load" style="width: 100px;" onclick="p1()">即時</button>
-                    <button type="button" class="btn btn-success" id="load2" onclick="p2()">回放</button>
-                    <button type="button" class="btn btn-warning" id="load3" onclick="p3()">輪播</button>
-                </div>
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <i class="fas fa-video fa-2x" id="recordBtn" style="cursor: pointer;"></i>
-                    <i class="fas fa-camera fa-2x" style="margin-left: 5px;cursor: pointer;" onclick="capture()"></i>
-                    <!--<button type="button" class="btn btn-primary" id="recordBtn">錄影</button>
-                    <button type="button" class="btn btn-success" >截圖</button>-->
-                </div>
-
-
-
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label style="margin-left: 5px"></label>Loading:<label id="time"></label>
+        </div>
+    </div>
+    <!--
+    <div class="row">
+        <div class="col-1 align-items-center align-self-center" ><i class="fas fa-chevron-left fa-3x" onclick="goleft()"></i></div>
+        <div class="col align-items-center">
+            <div class="row">
+                <div class="col-6" id="view1" data-flg="0" onclick="playview(this)"></div>
+                <div class="col-6" id="view2" data-flg="1" onclick="playview(this)"></div>
+            </div>
+            <div class="row">
+                <div class="col-6" id="view3" data-flg="2" onclick="playview(this)"></div>
+                <div class="col-6" id="view4" data-flg="3" onclick="playview(this)"></div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <label style="margin-left: 5px"></label>Loading:<label id="time"></label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-1"></div>
-            <div class="col ratio ratio-16x9">
-                <video controls id="video" autoplay></video>
-            </div>
-            <div class="col-1">
+        <div class="col-1 align-items-center align-self-center"><i class="fas fa-chevron-right fa-3x" onclick="goright()"></i></div>
+
+
+
+
+    </div>-->
+    <div class="row">
+        <div class="col-1"></div>
+        <div class='col ratio ratio-16x9'> <video controls id='video' autoplay></video> </div>
+        <div class="col-1">
 
 
         </div>
@@ -61,12 +77,12 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script
-        src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.1/dist/loadingoverlay.min.js"></script>
+            src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.1/dist/loadingoverlay.min.js"></script>
     <script src="https://momentjs.com/downloads/moment.min.js"></script>
     <script src="JS/rtsp.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
     <script>
         const video = document.getElementById('video');
         const $crar = $("#crar");
@@ -80,6 +96,75 @@
             var hls = new Hls();
         }
 
+        function goleft(){
+            flg = $("#view1").attr("data-flg");
+            if(flg>0) {
+                $("#view1").attr("data-flg", parseInt(flg) - 4);
+                $("#view2").attr("data-flg", parseInt(flg) + 1 - 4);
+                $("#view3").attr("data-flg", parseInt(flg) + 2 - 4);
+                $("#view4").attr("data-flg", parseInt(flg) + 3 - 4);
+                var start = 0;
+                for (var i = start; i < 4; i++) {
+                    var imgview = $('#view' + (i + 1));
+                    html = "<img style='width: 100%;height: 100%' src='http://" + host + ":8080/cgi-bin/net_jpeg.cgi?ch=" + $('#view' + (i + 1)).attr("data-flg") + "'>";
+                    imgview.html(html);
+                }
+            }
+        }
+
+        function goright(){
+            flg = $("#view1").attr("data-flg");
+
+            $("#view1").attr("data-flg",parseInt(flg)+4);
+            $("#view2").attr("data-flg",parseInt(flg)+1+4);
+            $("#view3").attr("data-flg",parseInt(flg)+2+4);
+            $("#view4").attr("data-flg",parseInt(flg)+3+4);
+            var start = 0;
+            for(var i=start;i<4;i++){
+                var imgview = $('#view'+(i+1));
+                html="<img style='width: 100%;height: 100%;cursor: pointer'  src='http://"+host+":8080/cgi-bin/net_jpeg.cgi?ch="+$('#view'+(i+1)).attr("data-flg")+"'>";
+                imgview.html(html);
+            }
+        }
+
+
+        function playview(flg){
+            var start = $("#view1").attr("data-flg");
+            $("#view1").html("");
+            $("#view2").html("");
+            $("#view3").html("");
+            $("#view4").html("");
+            $("#view1").attr("data-flg",parseInt(start)+0);
+            $("#view2").attr("data-flg",parseInt(start)+1);
+            $("#view3").attr("data-flg",parseInt(start)+2);
+            $("#view4").attr("data-flg",parseInt(start)+3);
+            for(var i=start;i<4;i++){
+                var imgview = $('#view'+(i+1));
+                html="<img style='width: 100%;height: 100%;cursor: pointer'  src='http://"+host+":8080/cgi-bin/net_jpeg.cgi?ch="+i+"'>";
+                imgview.html(html);
+            }
+            var t = flg.getAttribute("data-flg");
+            flg.innerHTML="<div class='col ratio ratio-16x9'> <video controls id='video' autoplay></video> </div>";
+            ;
+            var start = $("#crar option")[1].getAttribute("data-type");
+            var playback = '';
+
+            var c = $("#crar option")[t].getAttribute("data-type");
+            dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+            dvrs[parseInt(start)].sessionID = socket.id;
+            dvrs[parseInt(start)].ch = c;
+            dvrs[parseInt(start)].view = t;
+            startDate = moment();;
+            socket.emit('play', dvrs[parseInt(start)]);
+
+        }
+
+        function playvideo(imgflg){
+            //var div = imgflg.parentNode.getAttribute("data-flg")
+            //imgflg.parentNode.innerHTML("");
+
+        };
+
         function 撥放摄影機(撥放時間) {
             var start = $("#crar option:selected").index();
             var playback = '';
@@ -92,9 +177,28 @@
             var c = $("#crar option:selected").attr("data-type");
             dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
             dvrs[parseInt(start)].sessionID = socket.id;
+            dvrs[parseInt(start)].ch = start+1;
             socket.emit('play', dvrs[parseInt(start)]);
         }
 
+        /*
+        function 撥放摄影機(撥放時間) {
+            var start = $("#crar option:selected").index();
+            var playback = '';
+            if (撥放時間 != undefined) {
+                if (撥放時間 != "") {
+                    var b = Math.floor(撥放時間.getTime() / 1000);
+                    playback = '&beg=' + b;
+                }
+            }
+            var c = $("#crar option:selected").attr("data-type");
+            dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+            dvrs[parseInt(start)].sessionID = socket.id;
+            dvrs[parseInt(start)].ch = c;
+            socket.emit('play', dvrs[parseInt(start)]);
+        }
+
+         */
 
 
         socket.on('sessionID', function (msg) {
@@ -105,6 +209,11 @@
         });
         socket.on('getList', function (msg) {
             host = msg.host;
+            //for(var i=$("#crar option:selected").index();i<4;i++){
+            //    var imgview = $('#view'+(i+1));
+            //    html="<img  style='width: 100%;height: 100%;cursor: pointer' data-flg='"+i+"'  src='http://"+host+":8080/cgi-bin/net_jpeg.cgi?ch="+i+"'>";
+            //    imgview.html(html);
+            //}
             if ($crar.html() == '') {
                 dvrs = msg.chs;
                 $crar.html("");
@@ -115,6 +224,7 @@
         });
         socket.on('loadc', function (msg) {
             if (msg.sessionID === socket.id) {
+
                 clearInterval(refreshIntervalId);
                 $.LoadingOverlay("hide");
                 $tiem.html(moment().diff(startDate, "milliseconds") + "ms");
@@ -124,18 +234,18 @@
                 if (Hls.isSupported()) {
                     //$('#source').html("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8")
                     hls.loadSource("http://" + host + ":3000/streams/" + socket.id + ".m3u8");
-                    hls.attachMedia(video);
+                    hls.attachMedia(document.getElementById('video'));
                     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                        video.muted = true;
-                        video.play();
+                        document.getElementById('video').muted = true;
+                        document.getElementById('video').play();
                         //if (isMobileDevice()) {
                         //    video.style.width = window.innerWidth - 45;
                         //}
                     });
                 } else {
-                    video.src = "http://" + host + ":3000/streams/" + socket.id + ".m3u8";
+                    document.getElementById('video').src = "http://" + host + ":3000/streams/" + socket.id + ".m3u8";
                     setTimeout(function () {
-                        video.play();
+                        document.getElementById('video').play();
                         if (isMobileDevice()) {
                             // video.style.width = window.innerWidth - 45;
                         }
@@ -143,8 +253,6 @@
                 }
             }
         });
-
-
 
 
         const recordBtn = document.getElementById("recordBtn");
@@ -156,7 +264,7 @@
             recording = !recording;
             if (recording) {
                 recordBtn.style.color = "red";
-                const stream = video.captureStream(25);
+                const stream = document.getElementById('video').captureStream(25);
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: 'video/webm',
                     ignoreMutedMedia: true
