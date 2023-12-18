@@ -7,6 +7,10 @@
  supervisor -g ./source-m3u8,./log,*.html hls.js
  */
 
+/*
+12.18 加入浮水印
+ */
+
 let ServerSetting = require("./config.js")
 const HLSServer = require('hls-server');
 const fs = require("fs");
@@ -28,7 +32,7 @@ log4js.configure({
 });
 var logger = log4js.getLogger('hls');
 try {
-    fs.readdir('./' + 轉檔目錄, function (err, files) {
+    fs.readdirSync('./' + 轉檔目錄, function (err, files) {
         if (err) {
             fs.promises.mkdir('./' + 轉檔目錄, {recursive: true});
             return console.log('Unable to scan directory: ' + err);
@@ -69,6 +73,7 @@ const server = http.createServer((req, res) => {
     try {
         html = fs.readFileSync(__dirname + url.parse(req.url).pathname, "utf8");
     } catch (e) {
+        res.status(500).send("Internal server error");
         console.log(e)
     }
     res.write(html);
@@ -114,7 +119,10 @@ io.on("connection", async (socket) => {
         }
         var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8"
         obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
-        obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
+        obj.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize=80:fontcolor=White:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50," +
+            "drawtext=fontfile=mingliu.ttc:fontsize=40:fontcolor=yellow:text=浮水印:x=w-tw:y=h-th[out]";
+        //obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
+
         global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", '-b:v', '100K', '-level',
             "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
             "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
