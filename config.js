@@ -10,7 +10,8 @@ const ServerSetting = {
     videoWidth: 640,
     videoHeight: 360,
     camerLength: 32,
-    線程: os.cpus().length
+    線程: os.cpus().length,
+    浮水印:"浮水印"
 }
 
 module.exports = ServerSetting;

@@ -1,0 +1,25 @@
+
+1.安裝NODEJS
+2.執行npm install pm2 -g
+3.執行npm install pm2-windows-startup -g
+4.安裝FFMPEG
+5.切換至程式目錄
+6.執行npm install
+7.打開config.js,修改
+ServerSetting 
+    host: "localhost", WEB主機位址
+    攝影主機:"rtspcameratest.ddns.net", 攝影主機位址
+    攝影主機PORT:8080, 攝影主機位址使用PORT
+    serverPort:3000,WEB主機位址
+    username: "admin",攝影主機登入帳號
+    userpass: "abcd1234",攝影主機登入密碼
+    videoWidth: 640,轉出檔案寬
+    videoHeight: 360,轉出檔案高
+    camerLength: 32,頻道數量
+    線程: os.cpus().length 轉檔使用多少CPU核心
+    浮水印:"浮水印" 右下角水印字樣
+8.執行
+pm2 start hls.config.js => 上線用
+或 
+supervisor -g ./source-m3u8,./log,*.html hls.js  =>開發用
+

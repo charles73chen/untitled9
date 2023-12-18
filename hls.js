@@ -20,7 +20,7 @@ const child_process = require("child_process");
 const url = require("url");
 const os = require("os");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
-let option = {chs: [], host: ServerSetting.host};
+let option = {chs: [], host: ServerSetting.host,port:ServerSetting.serverPort};
 let dvrs = [];
 let 轉檔目錄 = 'source-m3u8';
 log4js.configure({
@@ -120,7 +120,7 @@ io.on("connection", async (socket) => {
         var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8"
         obj.url = "http://" + ServerSetting.username + ":" + ServerSetting.userpass + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
         obj.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize=80:fontcolor=White:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50," +
-            "drawtext=fontfile=mingliu.ttc:fontsize=40:fontcolor=yellow:text=浮水印:x=w-tw:y=h-th[out]";
+            "drawtext=fontfile=mingliu.ttc:fontsize=40:fontcolor=yellow:text="+ServerSetting.浮水印+":x=w-tw:y=h-th[out]";
         //obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
 
         global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", '-b:v', '100K', '-level',
