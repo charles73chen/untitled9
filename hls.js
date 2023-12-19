@@ -50,8 +50,8 @@ for (i = 0; i < dvrs.length; i++) {
     var data = {
         name: dvrs[i].chname,
         ch: dvrs[i].ch,
-        url: dvrurl,
-        durl: dvrurl,
+        url: ServerSetting.攝影主機.API位址,
+        durl: ServerSetting.攝影主機.API位址,
         width: 640,
         height: 480,
         id: dvrs[i].id
