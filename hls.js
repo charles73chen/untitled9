@@ -127,7 +127,7 @@ function 轉檔(id,dvr){
                 logger.info(filename + "------uncomplete");
                 return
             }
-            io.emit("loadc", {sessionID: id, host:ServerSetting.WEB主機.位址});
+            io.emit("loadc", {sessionID: id, host:ServerSetting.WEB主機.位址,port:ServerSetting.WEB主機.PORT});
             clearInterval(refreshIntervalId);
         })
     }, 200)
