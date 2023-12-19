@@ -4,6 +4,7 @@ const ServerSetting = {
         camerLength: 32,//頻道數量
         位址:"192.168.1.113",
         PORT:80,
+        對外PORT:8080,
         username: "admin",//攝影主機登入帳號
         userpass: "abcd1234",//攝影主機登入密碼
     },//攝影主機
