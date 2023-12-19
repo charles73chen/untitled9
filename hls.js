@@ -83,6 +83,7 @@ let sessionID = "";
 io.on("connection", async (socket) => {
     sessionID = socket.id;
     global[socket.id] = "";
+    logger.info("connection by "+socket.id);
     io.emit("sessionID", socket.id);
     io.emit("getList", option);
     socket.on("play", function (obj) {
