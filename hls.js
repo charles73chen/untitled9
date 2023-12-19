@@ -113,6 +113,7 @@ io.on("connection", async (socket) => {
         }
         var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8"
         obj.url = "http://" + obj.username + ":" + obj.password + "@" + ServerSetting.攝影主機.位址 + ":" + ServerSetting.攝影主機.PORT + obj.url
+        obj.url="http://" + obj.username + ":" + obj.password + "@" + ServerSetting.攝影主機.位址 + ":" + ServerSetting.攝影主機.PORT + "/344272189_5949733988466644_3942337907380818909_n.mp4"
         obj.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize="+ServerSetting.浮水印.左上字體尺寸+":fontcolor=White:text='"+ServerSetting.浮水印.左上頻道+" "+String(obj.ch).padStart(2, "0")+"':x=20:y=50," +
             "drawtext=fontfile=mingliu.ttc:fontsize="+ServerSetting.浮水印.右下字體尺寸+":fontcolor=yellow:text="+ServerSetting.浮水印.右下+":x=w-tw:y=h-th[out]";
         //obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
