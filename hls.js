@@ -20,7 +20,7 @@ const child_process = require("child_process");
 const url = require("url");
 const os = require("os");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
-let option = {chs: [], host: ServerSetting.host,port:ServerSetting.serverPort};
+let option = {chs: [], host: ServerSetting.WEB主機.位址,port:ServerSetting.WEB主機.PORT};
 let dvrs = [];
 let 轉檔目錄 = 'source-m3u8';
 log4js.configure({
@@ -45,7 +45,7 @@ try {
 } catch (e) {
 }
 
-for (var i = 1; i <= ServerSetting.camerLength; i++) {
+for (var i = 1; i <= ServerSetting.攝影主機.camerLength; i++) {
     var k = "";
     for (j = 1; j < i; j++) {
         k = k + "0";
@@ -84,7 +84,7 @@ const hls = new HLSServer(server, {
     dir: 轉檔目錄, // Directory that input files are stored
 });
 
-server.listen(ServerSetting.serverPort);
+server.listen(ServerSetting.WEB主機.PORT);
 const io = require("socket.io")(server, {});
 let sessionID = "";
 io.on("connection", async (socket) => {
@@ -119,14 +119,14 @@ io.on("connection", async (socket) => {
 
         }
         var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8"
-        obj.url = "http://" + obj.username + ":" + obj.password + "@" + ServerSetting.攝影主機 + ":" + ServerSetting.攝影主機PORT + obj.url
-        obj.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize=80:fontcolor=White:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50," +
-            "drawtext=fontfile=mingliu.ttc:fontsize=40:fontcolor=yellow:text="+ServerSetting.浮水印+":x=w-tw:y=h-th[out]";
+        obj.url = "http://" + obj.username + ":" + obj.password + "@" + ServerSetting.攝影主機.位址 + ":" + ServerSetting.攝影主機.PORT + obj.url
+        obj.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize="+ServerSetting.浮水印.左上字體尺寸+":fontcolor=White:text='"+ServerSetting.浮水印.左上頻道+" "+String(obj.ch).padStart(2, "0")+"':x=20:y=50," +
+            "drawtext=fontfile=mingliu.ttc:fontsize="+ServerSetting.浮水印.右下字體尺寸+":fontcolor=yellow:text="+ServerSetting.浮水印.右下+":x=w-tw:y=h-th[out]";
         //obj.text="drawtext=fontfile=AGENCYB.TTF:fontsize=80:text='CH "+String(obj.ch).padStart(2, "0")+"':x=20:y=50:fontcolor=White";
 
-        global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", '-b:v', '100K', '-level',
-            "3.0", "-s", ServerSetting.videoWidth + 'x' + ServerSetting.videoHeight, "-start_number", 0, "-hls_list_size", 0, "-threads", ServerSetting.線程,
-            "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
+        global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", "-b:v",
+        ServerSetting.轉檔參數.解柝度, '-level', "3.0", "-s", ServerSetting.轉檔參數.videoWidth + 'x' + ServerSetting.轉檔參數.videoHeight, "-start_number", 0, "-hls_list_size", 0,
+        "-threads", ServerSetting.轉檔參數.線程,"-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", ServerSetting.轉檔參數.轉檔速度, "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
             detached: false
         });
         var start = new Date();
