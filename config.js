@@ -2,9 +2,9 @@ const os = require("os");
 const ServerSetting = {
     攝影主機:{
         camerLength: 32,//頻道數量
-        位址:"192.168.1.113",
-        PORT:80,
-        對外PORT:8080,
+        位址:"rtspcameratest.ddns.net",
+        PORT:3000,
+        對外PORT:3000,
         username: "admin",//攝影主機登入帳號
         userpass: "abcd1234",//攝影主機登入密碼
         API位址:"/cgi-bin/net_video.cgi?hq=0"
