@@ -1,14 +1,7 @@
 //ffmpeg -f h264 -i "http://admin:abcd1234@rtspcameratest.ddns.net:8080/cgi-bin/net_video.cgi?hq=0&audio=1&iframe=1&pframe=1" -b:v 800K -level 3.0 -s 640x360 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
 /*
-1.安裝FFMPEG
-2.安裝PM2
-3.執行pm2 start hls.config.js
+執行請看安裝說明
 
- supervisor -g ./source-m3u8,./log,*.html hls.js
- */
-
-/*
-12.18 加入浮水印
  */
 
 let ServerSetting = require("./config.js")
@@ -19,7 +12,7 @@ const http = require('http');
 const child_process = require("child_process");
 const url = require("url");
 const os = require("os");
-let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
+let dvrurl = ServerSetting.攝影主機.API位址;
 let option = {chs: [], host: ServerSetting.WEB主機.位址,port:ServerSetting.WEB主機.PORT};
 let dvrs = [];
 let 轉檔目錄 = ServerSetting.轉檔參數.輸出目錄;
