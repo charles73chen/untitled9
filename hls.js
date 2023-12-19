@@ -73,7 +73,7 @@ const server = http.createServer((req, res) => {
     res.end();
 });
 const hls = new HLSServer(server, {
-    path: '/streams', // Base URI to output HLS streams
+    path: ServerSetting.WEB主機.串流URI, // Base URI to output HLS streams
     dir: 轉檔目錄, // Directory that input files are stored
 });
 

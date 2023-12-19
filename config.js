@@ -11,7 +11,8 @@ const ServerSetting = {
     },//攝影主機
     WEB主機:{
         位址:"rtspcameratest.ddns.net",
-        PORT:3000
+        PORT:3000,
+        串流URI:'/streams'
     },//WEB主機
     
     需要浮水印:true,
