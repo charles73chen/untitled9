@@ -87,6 +87,88 @@ io.on("connection", async (socket) => {
     io.emit("sessionID", socket.id);
     io.emit("getList", option);
     socket.on("play", function (obj) {
+        var objJson = JSON.parse(obj);
+        logger.info(socket.id)
+        logger.info(option.chs[parseInt(objJson.ch)-1]);
+        var dvr = option.chs[parseInt(objJson.ch)-1];
+        var start = objJson.ch;
+        var playback = '';
+        if (objJson.type==='1') {
+            //if (撥放時間 != "") {
+                var b = Math.floor(objJson.time / 1000);
+                playback = '&beg=' + b;
+            //}
+        }
+        var c = dvr.ch;
+        dvr.url =dvr.durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+        dvr.sessionID = socket.id;
+        dvr.ch = obj;
+        dvr.username = ServerSetting.攝影主機.username;
+        dvr.password = ServerSetting.攝影主機.password;
+
+        try {
+            process.kill(global[socket.id].pid);
+        } catch (e) {
+        }
+        try {
+            fs.readdir('./' + 轉檔目錄, function (err, files) {
+                if (err) {
+                    fs.promises.mkdir('./' + 轉檔目錄, {recursive: true});
+                    return console.log('Unable to scan directory: ' + err);
+                }
+                
+                files.forEach(function (file) {
+                    if (file.startsWith(dvr.sessionID)) {
+                        filePath = './' + 轉檔目錄 + '/' + file;
+                        fs.unlinkSync(filePath);
+                    }
+                });
+            });
+
+        } catch (e) {
+
+        }
+        var filename = "./" + 轉檔目錄 + "/" + socket.id + ".m3u8";
+        logger.info(ServerSetting);
+        dvr.url = "http://" + dvr.username + ":" + dvr.password + "@" + ServerSetting.攝影主機.位址 + ":" + ServerSetting.攝影主機.PORT + dvr.url
+        dvr.text="[in]drawtext=fontfile=AGENCYB.TTF:fontsize="+ServerSetting.轉檔參數.浮水印.左上字體尺寸+":fontcolor=White:text='"+ServerSetting.轉檔參數.浮水印.左上頻道+" "+String(dvr.ch).padStart(2, "0")+"':x=20:y=50," +
+            "drawtext=fontfile=mingliu.ttc:fontsize="+ServerSetting.轉檔參數.浮水印.右下字體尺寸+":fontcolor=yellow:text="+ServerSetting.轉檔參數.浮水印.右下+":x=w-tw:y=h-th[out]";
+        global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", dvr.url ,"-profile:v", "baseline", "-b:v",
+        ServerSetting.轉檔參數.解柝度, '-level', "3.0", "-s", ServerSetting.轉檔參數.videoWidth + 'x' + ServerSetting.轉檔參數.videoHeight, "-start_number", 0, "-hls_list_size", 0,
+        "-threads", ServerSetting.轉檔參數.線程,"-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", ServerSetting.轉檔參數.轉檔速度.快, "-an", "-crf", 40,"-vf",dvr.text, "-f", "hls", filename], {
+            detached: false
+        });
+        var start = new Date();
+        var refreshIntervalId = setInterval(function () {
+            fs.readFile(filename, function (error, data) {
+                var diff = new Date().getTime()-start.getTime();
+                if(diff/(1000)>ServerSetting.影片連線逾時秒數){
+                    io.emit("loaderror", {msg:"error",sessionID:socket.id});
+                    clearInterval(refreshIntervalId);;
+                }
+                    
+                if (error) {
+                    logger.info(filename + "------uncomplete");
+                    return
+                }
+                io.emit("loadc", {sessionID: socket.id, host:ServerSetting.WEB主機.位址});
+                clearInterval(refreshIntervalId);
+            })
+        }, 200)
+        //var scriptOutput = "";
+
+        global[socket.id].stdout.setEncoding('utf8');
+        global[socket.id].stdout.on('data', function (data) {
+            logger.info(data);
+        });
+
+        global[socket.id].stderr.setEncoding('utf8');
+        global[socket.id].stderr.on('data', function (data) {
+            logger.info(data);
+        });
+
+    });
+    socket.on("playch", function (obj) {
         logger.info(socket.id)
         logger.info(obj)
         //if (sessionID === obj.sessionID) {
@@ -130,7 +212,7 @@ io.on("connection", async (socket) => {
             fs.readFile(filename, function (error, data) {
                 var diff = new Date().getTime()-start.getTime();
                 if(diff/(1000)>ServerSetting.影片連線逾時秒數){
-                    io.emit("loaderror", {msg:"error"});
+                    io.emit("loaderror", {msg:"error",sessionID:socket.id});
                     clearInterval(refreshIntervalId);;
                 }
                     
@@ -138,7 +220,7 @@ io.on("connection", async (socket) => {
                     logger.info(filename + "------uncomplete");
                     return
                 }
-                io.emit("loadc", {sessionID: socket.id, vidw: obj.view});
+                io.emit("loadc", {sessionID: socket.id, view: obj.view});
                 clearInterval(refreshIntervalId);
             })
         }, 200)

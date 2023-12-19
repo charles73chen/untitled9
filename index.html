@@ -155,11 +155,11 @@
                 var start = $("#crar option")[1].getAttribute("data-type");
                 var playback = '';
 
-                var c = $("#crar option")[t].getAttribute("data-type");
+                var c = $("#crar option")[t].getAttribute("data-type");//頻道
                 dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
                 dvrs[parseInt(start)].sessionID = socket.id;
                 dvrs[parseInt(start)].ch = c;
-                dvrs[parseInt(start)].view = t;
+                //dvrs[parseInt(start)].view = t;
                 dvrs[parseInt(start)].username = $('#username').val();
                 dvrs[parseInt(start)].password = $('#password').val();
                 startDate = moment();;
@@ -188,7 +188,7 @@
                 dvrs[parseInt(start)].ch = start + 1;
                 dvrs[parseInt(start)].username = $('#username').val();
                 dvrs[parseInt(start)].password = $('#password').val();
-                socket.emit('play', dvrs[parseInt(start)]);
+                socket.emit('playch', dvrs[parseInt(start)]);
             }
 
             /*
@@ -210,8 +210,10 @@
     
              */
             socket.on('loaderror', function (msg) {
+                if (msg.sessionID === socket.id) {
                 $.LoadingOverlay("hide");
                 alert("連線失敗");
+                }
             });
 
             socket.on('sessionID', function (msg) {
