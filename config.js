@@ -14,10 +14,15 @@ const ServerSetting = {
     
     需要浮水印:true,
     轉檔參數:{
+        輸出目錄:"source-m3u8",
         videoWidth: 640,//轉出檔案寬
         videoHeight: 360,//轉出檔案高
         解柝度:"100K",
-        轉檔速度:"ultrafast",
+        轉檔速度:{
+            快:"ultrafast",
+            中:"medium",
+            慢:"veryslow",
+        },
         浮水印:{
             左上頻道:"CH",
             左上字體尺寸:80,
