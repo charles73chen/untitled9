@@ -126,7 +126,7 @@ io.on("connection", async (socket) => {
         var refreshIntervalId = setInterval(function () {
             fs.readFile(filename, function (error, data) {
                 var diff = new Date().getTime()-start.getTime();
-                if(diff/(1000)>ServerSetting.連線逾時秒數){
+                if(diff/(1000)>ServerSetting.影片連線逾時秒數){
                     io.emit("loaderror", {msg:"error"});
                     clearInterval(refreshIntervalId);;
                 }
