@@ -22,7 +22,7 @@ const os = require("os");
 let dvrurl = "/cgi-bin/net_video.cgi?hq=0";
 let option = {chs: [], host: ServerSetting.WEB主機.位址,port:ServerSetting.WEB主機.PORT};
 let dvrs = [];
-let 轉檔目錄 = 'source-m3u8';
+let 轉檔目錄 = ServerSetting.轉檔參數.輸出目錄;
 log4js.configure({
     appenders: {
         app: {type: 'dateFile', filename: './log/hls', pattern: 'yyyy-MM-dd.log', alwaysIncludePattern: true},
@@ -50,7 +50,7 @@ for (var i = 1; i <= ServerSetting.攝影主機.camerLength; i++) {
     for (j = 1; j < i; j++) {
         k = k + "0";
     }
-    dvrs.push({id: i, wsPort: 6000 + (i * 3), rtspch: "main_0", chname: '', ch: ("1" + k).padStart(32, "0")})
+    dvrs.push({id: i, wsPort: 6000 + (i * 3), rtspch: "main_0", chname: '', ch: ("1" + k).padStart(ServerSetting.攝影主機.camerLength, "0")})
 }
 for (i = 0; i < dvrs.length; i++) {
     //串流啟動參數,&audio=1&iframe=1&pframe=1
@@ -126,7 +126,7 @@ io.on("connection", async (socket) => {
 
         global[socket.id] = child_process.spawn("ffmpeg", ["-f", "h264", "-i", obj.url ,"-profile:v", "baseline", "-b:v",
         ServerSetting.轉檔參數.解柝度, '-level', "3.0", "-s", ServerSetting.轉檔參數.videoWidth + 'x' + ServerSetting.轉檔參數.videoHeight, "-start_number", 0, "-hls_list_size", 0,
-        "-threads", ServerSetting.轉檔參數.線程,"-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", ServerSetting.轉檔參數.轉檔速度, "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
+        "-threads", ServerSetting.轉檔參數.線程,"-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", ServerSetting.轉檔參數.轉檔速度.快, "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
             detached: false
         });
         var start = new Date();
