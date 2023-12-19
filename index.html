@@ -12,7 +12,11 @@
 <body>
     <div id="app" class="container">
         <label id="sessionId" style="display: none"></label><br><label id="source" style="display: none"></label><br>
-
+        <div class="row">
+            <div class="col">
+                <input type="text" value="admin" id="username"><input type="text" value="abcd1234" id="password">
+            </div>
+        </div>
         <div class="row">
             <div class="col">
                 <input type="datetime-local" id="ttime" class="form-control">
@@ -156,6 +160,8 @@
                 dvrs[parseInt(start)].sessionID = socket.id;
                 dvrs[parseInt(start)].ch = c;
                 dvrs[parseInt(start)].view = t;
+                dvrs[parseInt(start)].username = $('#username').val();
+                dvrs[parseInt(start)].password = $('#password').val();
                 startDate = moment();;
                 socket.emit('play', dvrs[parseInt(start)]);
 
