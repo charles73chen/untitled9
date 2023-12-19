@@ -188,7 +188,7 @@
                 dvrs[parseInt(start)].ch = start + 1;
                 dvrs[parseInt(start)].username = $('#username').val();
                 dvrs[parseInt(start)].password = $('#password').val();
-                socket.emit('playch', dvrs[parseInt(start)]);
+                socket.emit('play', dvrs[parseInt(start)]);
             }
 
             /*

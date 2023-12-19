@@ -86,7 +86,7 @@ io.on("connection", async (socket) => {
     logger.info("connection by "+socket.id);
     io.emit("sessionID", socket.id);
     io.emit("getList", option);
-    socket.on("play", function (obj) {
+    socket.on("playch", function (obj) {
         var objJson = JSON.parse(obj);
         logger.info(socket.id)
         logger.info(option.chs[parseInt(objJson.ch)-1]);
@@ -168,7 +168,7 @@ io.on("connection", async (socket) => {
         });
 
     });
-    socket.on("playch", function (obj) {
+    socket.on("play", function (obj) {
         logger.info(socket.id)
         logger.info(obj)
         //if (sessionID === obj.sessionID) {
