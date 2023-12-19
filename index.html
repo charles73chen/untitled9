@@ -186,6 +186,8 @@
                 dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
                 dvrs[parseInt(start)].sessionID = socket.id;
                 dvrs[parseInt(start)].ch = start + 1;
+                dvrs[parseInt(start)].username = $('#username').val();
+                dvrs[parseInt(start)].password = $('#password').val();
                 socket.emit('play', dvrs[parseInt(start)]);
             }
 
