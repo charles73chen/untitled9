@@ -20,7 +20,7 @@ const ServerSetting = {
     輸出目錄: "source-m3u8",
     videoWidth: 640, //轉出檔案寬
     videoHeight: 360, //轉出檔案高
-    解柝度: "100K",
+    解柝度: "1200K",
     轉檔速度: {
       快: "ultrafast",
       中: "medium",

@@ -33,19 +33,16 @@ log4js.configure({
   categories: { default: { appenders: ["app", "console"], level: "all" } },
 });
 var logger = log4js.getLogger("hls");
+logger.info(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄);
 try {
-  fs.readdirSync("./" + 轉檔目錄, function (err, files) {
-    if (err) {
-      fs.promises.mkdir("./" + 轉檔目錄, { recursive: true });
-      return console.log("Unable to scan directory: " + err);
-    }
-    files.forEach(function (file) {
-      filePath = "./" + 轉檔目錄 + "/" + file;
-      fs.unlinkSync(filePath);
-    });
+  fs.readdirSync(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\").forEach((file) => {
+    logger.info(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\" + file);
+    fs.unlinkSync(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\" + file);
   });
-} catch (e) {}
-
+} catch (e) {
+  logger.error(e);
+}
+logger.info("+");
 for (var i = 1; i <= ServerSetting.攝影主機.camerLength; i++) {
   var k = "";
   for (j = 1; j < i; j++) {
@@ -158,7 +155,7 @@ function 轉檔(id, dvr) {
       ServerSetting.轉檔參數.轉檔速度.快,
       "-an",
       "-crf",
-      40,
+      30,
       "-vf",
       dvr.text,
       "-f",
@@ -206,7 +203,11 @@ function 轉檔(id, dvr) {
 io.on("connection", async (socket) => {
   sessionID = socket.id;
   global[socket.id] = "";
-  logger.info("connection by " + socket.id);
+  var address = socket.client.conn.remoteAddress.substr(7);
+  //logger.info(socket);
+  //logger = log4js.getLogger(socket.id);
+  logger.info("New connection from " + socket.id + ":" + address);
+  //logger.info("connection by " + socket.id);
   io.emit("sessionID", socket.id);
   io.emit("getList", option);
   socket.on("playch", function (obj) {

@@ -21,3 +21,15 @@ ServerSetting
 pm2 start hls.config.js => 上線用
 或 
 supervisor -g ./source-m3u8,./log,*.html hls.js  =>開發用
+
+socket.io.
+play
+playch
+sessionID
+getList
+loadc => 當產生M3U8時發送
+{
+
+}
+loaderror => 當轉檔超過秒數時發送
+{ msg: "error", sessionID: id }
