@@ -207,7 +207,10 @@
             }
     
              */
-
+            socket.on('loaderror', function (msg) {
+                $.LoadingOverlay("hide");
+                alert("連線失敗");
+            });
 
             socket.on('sessionID', function (msg) {
                 //if ($('#sessionId').html() == '') {

@@ -106,6 +106,7 @@ io.on("connection", async (socket) => {
                     fs.promises.mkdir('./' + 轉檔目錄, {recursive: true});
                     return console.log('Unable to scan directory: ' + err);
                 }
+                
                 files.forEach(function (file) {
                     if (file.startsWith(obj.sessionID)) {
                         filePath = './' + 轉檔目錄 + '/' + file;
@@ -128,8 +129,15 @@ io.on("connection", async (socket) => {
             "-force_key_frames", "expr:gte(t,n_forced*1)", "-hls_time", 1, "-preset", "ultrafast", "-an", "-crf", 40,"-vf",obj.text, "-f", "hls", filename], {
             detached: false
         });
+        var start = new Date();
         var refreshIntervalId = setInterval(function () {
             fs.readFile(filename, function (error, data) {
+                var diff = new Date().getTime()-start.getTime();
+                if(diff/(60*1000)>1){
+                    io.emit("loaderror", {msg:"error"});
+                    clearInterval(refreshIntervalId);;
+                }
+                    
                 if (error) {
                     logger.info(filename + "------uncomplete");
                     return
