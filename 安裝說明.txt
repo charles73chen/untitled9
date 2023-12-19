@@ -1,25 +1,23 @@
-
-1.¦w¸ËNODEJS
-2.°õ¦ænpm install pm2 -g
-3.°õ¦ænpm install pm2-windows-startup -g
-4.¦w¸ËFFMPEG
-5.¤Á´«¦Üµ{¦¡¥Ø¿ý
-6.°õ¦ænpm install
-7.¥´¶}config.js,­×§ï
+1.å®‰è£NODEJS
+2.åŸ·è¡Œnpm install pm2 -g
+3.åŸ·è¡Œnpm install pm2-windows-startup -g
+4.å®‰è£FFMPEG
+5.åˆ‡æ›è‡³ç¨‹å¼ç›®éŒ„
+6.åŸ·è¡Œnpm install
+7.æ‰“é–‹config.js,ä¿®æ”¹
 ServerSetting 
-    host: "localhost", WEB¥D¾÷¦ì§}
-    Äá¼v¥D¾÷:"rtspcameratest.ddns.net", Äá¼v¥D¾÷¦ì§}
-    Äá¼v¥D¾÷PORT:8080, Äá¼v¥D¾÷¦ì§}¨Ï¥ÎPORT
-    serverPort:3000,WEB¥D¾÷¦ì§}
-    username: "admin",Äá¼v¥D¾÷µn¤J±b¸¹
-    userpass: "abcd1234",Äá¼v¥D¾÷µn¤J±K½X
-    videoWidth: 640,Âà¥XÀÉ®×¼e
-    videoHeight: 360,Âà¥XÀÉ®×°ª
-    camerLength: 32,ÀW¹D¼Æ¶q
-    ½uµ{: os.cpus().length ÂàÀÉ¨Ï¥Î¦h¤ÖCPU®Ö¤ß
-    ¯B¤ô¦L:"¯B¤ô¦L" ¥k¤U¨¤¤ô¦L¦r¼Ë
-8.°õ¦æ
-pm2 start hls.config.js => ¤W½u¥Î
-©Î 
-supervisor -g ./source-m3u8,./log,*.html hls.js  =>¶}µo¥Î
-
+    host: "localhost", WEBä¸»æ©Ÿä½å€
+    æ”å½±ä¸»æ©Ÿ:"rtspcameratest.ddns.net", æ”å½±ä¸»æ©Ÿä½å€
+    æ”å½±ä¸»æ©ŸPORT:8080, æ”å½±ä¸»æ©Ÿä½å€ä½¿ç”¨PORT
+    serverPort:3000,WEBä¸»æ©Ÿä½å€
+    username: "admin",æ”å½±ä¸»æ©Ÿç™»å…¥å¸³è™Ÿ
+    userpass: "abcd1234",æ”å½±ä¸»æ©Ÿç™»å…¥å¯†ç¢¼
+    videoWidth: 640,è½‰å‡ºæª”æ¡ˆå¯¬
+    videoHeight: 360,è½‰å‡ºæª”æ¡ˆé«˜
+    camerLength: 32,é »é“æ•¸é‡
+    ç·šç¨‹: os.cpus().length è½‰æª”ä½¿ç”¨å¤šå°‘CPUæ ¸å¿ƒ
+    æµ®æ°´å°:"æµ®æ°´å°" å³ä¸‹è§’æ°´å°å­—æ¨£
+8.åŸ·è¡Œ
+pm2 start hls.config.js => ä¸Šç·šç”¨
+æˆ– 
+supervisor -g ./source-m3u8,./log,*.html hls.js  =>é–‹ç™¼ç”¨
