@@ -10,7 +10,8 @@ const ServerSetting = {
     videoHeight: 360,//轉出檔案高
     camerLength: 32,//頻道數量
     線程: os.cpus().length,//轉檔使用多少CPU核心
-    浮水印:"浮水印"//右下角水印字樣
+    浮水印:"浮水印",//右下角水印字樣
+    連線逾時秒數:30
 }
 
 module.exports = ServerSetting;
