@@ -5,6 +5,7 @@
  */
 
 let ServerSetting = require("./config.js");
+const path = require("path");
 const HLSServer = require("hls-server");
 const fs = require("fs");
 var log4js = require("log4js");
@@ -33,11 +34,11 @@ log4js.configure({
   categories: { default: { appenders: ["app", "console"], level: "all" } },
 });
 var logger = log4js.getLogger("hls");
-logger.info(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄);
+logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄);
 try {
-  fs.readdirSync(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\").forEach((file) => {
-    logger.info(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\" + file);
-    fs.unlinkSync(__dirname + "\\" + ServerSetting.轉檔參數.輸出目錄 + "\\" + file);
+  fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+    logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+    fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
   });
 } catch (e) {
   logger.error(e);
@@ -97,21 +98,18 @@ function 轉檔(id, dvr) {
     process.kill(global[id].pid);
   } catch (e) {}
   try {
-    fs.readdir("./" + 轉檔目錄, function (err, files) {
+    fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+      //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       if (err) {
-        fs.promises.mkdir("./" + 轉檔目錄, { recursive: true });
+        fs.promises.mkdir(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
         return console.log("Unable to scan directory: " + err);
       }
-
-      files.forEach(function (file) {
-        if (file.startsWith(dvr.sessionID)) {
-          filePath = "./" + 轉檔目錄 + "/" + file;
-          fs.unlinkSync(filePath);
-        }
-      });
+      if (file.startsWith(dvr.sessionID)) {
+        fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+      }
     });
   } catch (e) {}
-  var filename = "./" + 轉檔目錄 + "/" + id + ".m3u8";
+  var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + ".m3u8";
   dvr.url = "http://" + dvr.username + ":" + dvr.password + "@" + ServerSetting.攝影主機.位址 + ":" + ServerSetting.攝影主機.PORT + dvr.url;
   dvr.text =
     "[in]drawtext=fontfile=AGENCYB.TTF:fontsize=" +
