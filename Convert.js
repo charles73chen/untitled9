@@ -89,11 +89,11 @@ export function 轉檔(id, dvr) {
   //var scriptOutput = "";
   global[id].stdout.setEncoding('utf8');
   global[id].stdout.on('data', (data) => {
-    logger.info(data);
+    //logger.info(data);
   });
 
   global[id].stderr.setEncoding('utf8');
   global[id].stderr.on('data', (data) => {
-    logger.info(data);
+    //logger.info(data);
   });
 }
