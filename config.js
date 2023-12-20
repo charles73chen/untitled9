@@ -7,7 +7,7 @@ const ServerSetting = {
     對外PORT: 8080,
     username: 'admin', //攝影主機登入帳號
     userpass: 'abcd1234', //攝影主機登入密碼
-    API位址: '/cgi-bin/net_video.cgi?hq=0',
+    APIURI: '/cgi-bin/net_video.cgi?hq=0',
   }, //攝影主機
   WEB主機: {
     位址: 'rtspcameratest.ddns.net',

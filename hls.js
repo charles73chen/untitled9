@@ -9,7 +9,6 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import os from 'os';
 import { 轉檔 } from './Convert.js';
-let dvrurl = ServerSetting.攝影主機.API位址;
 let option = {
   chs: [],
   host: ServerSetting.WEB主機.位址,
@@ -29,7 +28,7 @@ configure({
   },
   categories: { default: { appenders: ['app', 'console'], level: 'all' } },
 });
-export var logger = getLogger('hls');
+export const logger = getLogger('hls');
 logger.info(__dirname + sep + ServerSetting.轉檔參數.輸出目錄);
 try {
   readdirSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep).forEach((file) => {
@@ -57,8 +56,8 @@ for (i = 0; i < dvrs.length; i++) {
   var data = {
     name: dvrs[i].chname,
     ch: dvrs[i].ch,
-    url: ServerSetting.攝影主機.API位址,
-    durl: ServerSetting.攝影主機.API位址,
+    url: ServerSetting.攝影主機.APIURI,
+    durl: ServerSetting.攝影主機.APIURI,
     width: 640,
     height: 480,
     id: dvrs[i].id,
@@ -130,9 +129,11 @@ io.on('connection', async (socket) => {
     轉檔(socket.id, obj);
   });
   socket.on('disconnect', function () {
+    logger.info(socket.id + ' disconnect');
     try {
       process.kill(global[socket.id].pid);
-    } catch (e) {}
+    } catch (error) {}
+
     try {
       readdirSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep).forEach((file) => {
         //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
