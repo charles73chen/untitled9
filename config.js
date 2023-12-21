@@ -1,4 +1,4 @@
-import { cpus } from 'os';
+const os = require('os');
 const ServerSetting = {
   攝影主機: {
     camerLength: 32, //頻道數量
@@ -31,9 +31,9 @@ const ServerSetting = {
       右下: '浮水印',
       右下字體尺寸: 40,
     }, //右下角水印字樣
-    線程: cpus().length, //轉檔使用多少CPU核心
+    線程: os.cpus().length, //轉檔使用多少CPU核心
   },
   影片連線逾時秒數: 30,
 };
 
-export default ServerSetting;
+module.exports = ServerSetting;

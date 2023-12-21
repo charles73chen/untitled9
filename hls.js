@@ -1,14 +1,19 @@
 //ffmpeg -f h264 -i "http://admin:abcd1234@rtspcameratest.ddns.net:8080/cgi-bin/net_video.cgi?hq=0&audio=1&iframe=1&pframe=1" -b:v 800K -level 3.0 -s 640x360 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
+/*
+執行請看安裝說明
 
-import ServerSetting from './config.js';
-import { sep } from 'path';
-import HLSServer from 'hls-server';
-import { readdirSync, unlinkSync, readFileSync, promises } from 'fs';
-import { configure, getLogger } from 'log4js';
-import { createServer } from 'http';
-import { parse } from 'url';
-import os from 'os';
-import { 轉檔 } from './Convert.js';
+ */
+
+let ServerSetting = require('./config.js');
+const path = require('path');
+const HLSServer = require('hls-server');
+const fs = require('fs');
+var log4js = require('log4js');
+const http = require('http');
+const url = require('url');
+const os = require('os');
+const child_process = require('child_process');
+let dvrurl = ServerSetting.攝影主機.API位址;
 let option = {
   chs: [],
   host: ServerSetting.WEB主機.位址,
@@ -16,7 +21,7 @@ let option = {
 };
 let dvrs = [];
 let 轉檔目錄 = ServerSetting.轉檔參數.輸出目錄;
-configure({
+log4js.configure({
   appenders: {
     app: {
       type: 'dateFile',
@@ -28,11 +33,13 @@ configure({
   },
   categories: { default: { appenders: ['app', 'console'], level: 'all' } },
 });
-export const logger = getLogger('hls');
-logger.info(__dirname + sep + ServerSetting.轉檔參數.輸出目錄);
+var logger = log4js.getLogger('hls');
+exports.logger = logger;
+logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄);
 try {
-  readdirSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep).forEach((file) => {
-    unlinkSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep + file);
+  fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+    logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+    fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
   });
 } catch (e) {
   logger.error(e);
@@ -65,15 +72,15 @@ for (i = 0; i < dvrs.length; i++) {
   option.chs.push(data);
 }
 
-const server = createServer((req, res) => {
+const server = http.createServer((req, res) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html');
   let html = '';
   try {
-    html = readFileSync(__dirname + parse(req.url).pathname, 'utf8');
+    html = fs.readFileSync(__dirname + url.parse(req.url).pathname, 'utf8');
   } catch (e) {
-    logger.info(__dirname + parse(req.url).pathname);
-    logger.info(e);
+    res.status(500).send('Internal server error');
+    console.log(e);
   }
   res.write(html);
   res.end();
@@ -84,16 +91,119 @@ const hls = new HLSServer(server, {
 });
 
 server.listen(ServerSetting.WEB主機.PORT);
-export const io = require('socket.io')(server, {});
+const io = require('socket.io')(server, {});
+exports.io = io;
 let sessionID = '';
+function 轉檔(id, dvr) {
+  try {
+    process.kill(global[id].pid);
+  } catch (e) {}
+  try {
+    fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+      //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+      if (err) {
+        fs.promises.mkdir(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
+        return console.log('Unable to scan directory: ' + err);
+      }
+      if (file.startsWith(dvr.sessionID)) {
+        fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+      }
+    });
+  } catch (e) {}
+  var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + '.m3u8';
+  dvr.url = 'http://' + dvr.username + ':' + dvr.password + '@' + ServerSetting.攝影主機.位址 + ':' + ServerSetting.攝影主機.PORT + dvr.url;
+  dvr.text =
+    '[in]drawtext=fontfile=AGENCYB.TTF:fontsize=' +
+    ServerSetting.轉檔參數.浮水印.左上字體尺寸 +
+    ":fontcolor=White:text='" +
+    ServerSetting.轉檔參數.浮水印.左上頻道 +
+    ' ' +
+    String(dvr.ch).padStart(2, '0') +
+    "':x=20:y=50," +
+    'drawtext=fontfile=mingliu.ttc:fontsize=' +
+    ServerSetting.轉檔參數.浮水印.右下字體尺寸 +
+    ':fontcolor=yellow:text=' +
+    ServerSetting.轉檔參數.浮水印.右下 +
+    ':x=w-tw:y=h-th[out]';
+  global[id] = child_process.spawn(
+    'ffmpeg',
+    [
+      '-f',
+      'h264',
+      '-i',
+      dvr.url,
+      '-profile:v',
+      'baseline',
+      '-b:v',
+      ServerSetting.轉檔參數.解柝度,
+      '-level',
+      '3.0',
+      '-s',
+      ServerSetting.轉檔參數.videoWidth + 'x' + ServerSetting.轉檔參數.videoHeight,
+      '-start_number',
+      0,
+      '-hls_list_size',
+      0,
+      '-threads',
+      ServerSetting.轉檔參數.線程,
+      '-force_key_frames',
+      'expr:gte(t,n_forced*1)',
+      '-hls_time',
+      1,
+      '-preset',
+      ServerSetting.轉檔參數.轉檔速度.快,
+      '-an',
+      '-crf',
+      30,
+      '-vf',
+      dvr.text,
+      '-f',
+      'hls',
+      filename,
+    ],
+    {
+      detached: false,
+    }
+  );
+  var start = new Date();
+  var refreshIntervalId = setInterval(function () {
+    fs.readFile(filename, function (error, data) {
+      var diff = new Date().getTime() - start.getTime();
+      if (diff / 1000 > ServerSetting.影片連線逾時秒數) {
+        io.emit('loaderror', { msg: 'error', sessionID: id });
+        clearInterval(refreshIntervalId);
+      }
 
+      if (error) {
+        logger.info(filename + '------uncomplete');
+        return;
+      }
+      io.emit('loadc', {
+        sessionID: id,
+        host: ServerSetting.WEB主機.位址,
+        port: ServerSetting.WEB主機.PORT,
+      });
+      clearInterval(refreshIntervalId);
+    });
+  }, 200);
+  //var scriptOutput = "";
+  global[id].stdout.setEncoding('utf8');
+  global[id].stdout.on('data', function (data) {
+    logger.info(data);
+  });
+
+  global[id].stderr.setEncoding('utf8');
+  global[id].stderr.on('data', function (data) {
+    logger.info(data);
+  });
+}
 io.on('connection', async (socket) => {
   sessionID = socket.id;
   global[socket.id] = '';
   var address = socket.client.conn.remoteAddress.substr(7);
   //logger.info(socket);
   //logger = log4js.getLogger(socket.id);
-  logger.info(`New connection from ${socket.id}:${address}`);
+  logger.info('New connection from ' + socket.id + ':' + address);
   //logger.info("connection by " + socket.id);
   io.emit('sessionID', socket.id);
   io.emit('getList', option);
@@ -105,7 +215,7 @@ io.on('connection', async (socket) => {
       objJson = JSON.parse(obj);
     }
 
-    //logger.info(socket.id);
+    logger.info(socket.id);
     logger.info(option.chs[parseInt(objJson.ch) - 1]);
     var dvr = option.chs[parseInt(objJson.ch) - 1];
     var playback = '';
@@ -123,27 +233,26 @@ io.on('connection', async (socket) => {
     dvr.password = ServerSetting.攝影主機.password;
     轉檔(socket.id, dvr);
   });
-  socket.on('play', (obj) => {
-    //logger.info(socket.id);
+  socket.on('play', function (obj) {
+    logger.info(socket.id);
     logger.info(obj);
     轉檔(socket.id, obj);
   });
   socket.on('disconnect', function () {
-    logger.info(socket.id + ' disconnect');
     try {
       process.kill(global[socket.id].pid);
-    } catch (error) {}
-
+    } catch (e) {}
     try {
-      readdirSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep).forEach((file) => {
-        //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+      fs.readdir('./source-m3u8', function (err, files) {
         if (err) {
-          promises.mkdir(__dirname + sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
           return console.log('Unable to scan directory: ' + err);
         }
-        if (file.startsWith(socket.id)) {
-          unlinkSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep + file);
-        }
+        files.forEach(function (file) {
+          if (file.startsWith(socket.id)) {
+            filePath = './' + 轉檔目錄 + '/' + file;
+            fs.unlinkSync(filePath);
+          }
+        });
       });
     } catch (e) {}
     global[socket.id] = null;
