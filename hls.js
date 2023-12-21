@@ -77,7 +77,7 @@ const server = http.createServer((req, res) => {
   try {
     html = fs.readFileSync(__dirname + url.parse(req.url).pathname, 'utf8');
   } catch (e) {
-    res.status(500).send('Internal server error');
+    //res.status(500).send('Internal server error');
     console.log(e);
   }
   res.write(html);
