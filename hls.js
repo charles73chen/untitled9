@@ -218,12 +218,12 @@ io.on('connection', async (socket) => {
     dvr.ch = obj;
     dvr.username = ServerSetting.攝影主機.username;
     dvr.password = ServerSetting.攝影主機.password;
-    轉檔(socket.id, dvr);
+    convert(socket.id, dvr);
   });
   socket.on('play', function (obj) {
     logger.info(socket.id);
     logger.info(obj);
-    convert(socket.id, obj, io, logger);
+    convert(socket.id, obj);
   });
   socket.on('disconnect', function () {
     try {
@@ -240,3 +240,8 @@ io.on('connection', async (socket) => {
     global[socket.id] = null;
   });
 });
+
+module.exports = {
+  io: io,
+  logger: logger,
+};

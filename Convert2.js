@@ -2,8 +2,8 @@ let ServerSetting = require('./config.js');
 const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
-
-function 轉檔(id, dvr, io, logger) {
+const hls = require('./hls.js');
+function 轉檔(id, dvr) {
   try {
     process.kill(global[id].pid);
   } catch (e) {}
@@ -19,9 +19,9 @@ function 轉檔(id, dvr, io, logger) {
       }
     });
   } catch (e) {}
-  logger.info(dvr);
+  hls.logger.info(dvr);
   var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + '.m3u8';
-  dvr.url = 'http://' + dvr.username + ':' + dvr.password + '@' + ServerSetting.攝影主機.位址 + ':' + ServerSetting.攝影主機.PORT + dvr.url;
+  dvr.url = `http://${dvr.username}:${dvr.password}@${ServerSetting.攝影主機.位址}:${ServerSetting.攝影主機.PORT}${dvr.url}`;
   dvr.text = `[in]drawtext=fontfile=AGENCYB.TTF:fontsize=${ServerSetting.轉檔參數.浮水印.左上字體尺寸}:fontcolor=White:text=${ServerSetting.轉檔參數.浮水印.左上頻道} ${String(dvr.ch).padStart(2, '0')}:x=20:y=50,drawtext=fontfile=mingliu.ttc:fontsize=${
     ServerSetting.轉檔參數.浮水印.右下字體尺寸
   }:fontcolor=yellow:text=${ServerSetting.轉檔參數.浮水印.右下}:x=w-tw:y=h-th[out]`;
@@ -70,15 +70,15 @@ function 轉檔(id, dvr, io, logger) {
     fs.readFile(filename, function (error, data) {
       var diff = new Date().getTime() - start.getTime();
       if (diff / 1000 > ServerSetting.影片連線逾時秒數) {
-        io.emit('loaderror', { msg: 'error', sessionID: id });
+        hls.io.emit('loaderror', { msg: 'error', sessionID: id });
         clearInterval(refreshIntervalId);
       }
 
       if (error) {
-        logger.info(filename + '------uncomplete');
+        hls.logger.info(filename + '------uncomplete');
         return;
       }
-      io.emit('loadc', {
+      hls.io.emit('loadc', {
         sessionID: id,
         host: ServerSetting.WEB主機.位址,
         port: ServerSetting.WEB主機.PORT,
@@ -89,12 +89,12 @@ function 轉檔(id, dvr, io, logger) {
   //var scriptOutput = "";
   global[id].stdout.setEncoding('utf8');
   global[id].stdout.on('data', function (data) {
-    logger.info(data);
+    hls.logger.info(data);
   });
 
   global[id].stderr.setEncoding('utf8');
   global[id].stderr.on('data', function (data) {
-    logger.info(data);
+    hls.logger.info(data);
   });
 }
 module.exports = 轉檔;
