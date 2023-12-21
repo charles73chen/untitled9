@@ -100,31 +100,17 @@ function 轉檔(id, dvr) {
   } catch (e) {}
   try {
     fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
-      //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
-      if (err) {
-        fs.promises.mkdir(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
-        return console.log('Unable to scan directory: ' + err);
-      }
+      logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       if (file.startsWith(dvr.sessionID)) {
         fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       }
     });
   } catch (e) {}
   var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + '.m3u8';
-  dvr.url = 'http://' + dvr.username + ':' + dvr.password + '@' + ServerSetting.攝影主機.位址 + ':' + ServerSetting.攝影主機.PORT + dvr.url;
-  dvr.text =
-    '[in]drawtext=fontfile=AGENCYB.TTF:fontsize=' +
-    ServerSetting.轉檔參數.浮水印.左上字體尺寸 +
-    ":fontcolor=White:text='" +
-    ServerSetting.轉檔參數.浮水印.左上頻道 +
-    ' ' +
-    String(dvr.ch).padStart(2, '0') +
-    "':x=20:y=50," +
-    'drawtext=fontfile=mingliu.ttc:fontsize=' +
-    ServerSetting.轉檔參數.浮水印.右下字體尺寸 +
-    ':fontcolor=yellow:text=' +
-    ServerSetting.轉檔參數.浮水印.右下 +
-    ':x=w-tw:y=h-th[out]';
+  dvr.url = `http://${dvr.username}:${dvr.password}@${ServerSetting.攝影主機.位址}:${ServerSetting.攝影主機.PORT}${dvr.url}`;
+  dvr.text = `[in]drawtext=fontfile=AGENCYB.TTF:fontsize=${ServerSetting.轉檔參數.浮水印.左上字體尺寸}:fontcolor=White:text=${ServerSetting.轉檔參數.浮水印.左上頻道} ${String(dvr.ch).padStart(2, '0')}:x=20:y=50,drawtext=fontfile=mingliu.ttc:fontsize=${
+    ServerSetting.轉檔參數.浮水印.右下字體尺寸
+  }:fontcolor=yellow:text=${ServerSetting.轉檔參數.浮水印.右下}:x=w-tw:y=h-th[out]`;
   global[id] = child_process.spawn(
     'ffmpeg',
     [
@@ -243,16 +229,11 @@ io.on('connection', async (socket) => {
       process.kill(global[socket.id].pid);
     } catch (e) {}
     try {
-      fs.readdir('./source-m3u8', function (err, files) {
-        if (err) {
-          return console.log('Unable to scan directory: ' + err);
+      fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+        logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+        if (file.startsWith(socket.id)) {
+          fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
         }
-        files.forEach(function (file) {
-          if (file.startsWith(socket.id)) {
-            filePath = './' + 轉檔目錄 + '/' + file;
-            fs.unlinkSync(filePath);
-          }
-        });
       });
     } catch (e) {}
     global[socket.id] = null;
