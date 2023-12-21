@@ -74,8 +74,6 @@ const server = createServer((req, res) => {
   } catch (e) {
     logger.info(__dirname + parse(req.url).pathname);
     logger.info(e);
-    //res.status(500).send('Internal server error');
-    console.log(e);
   }
   res.write(html);
   res.end();
