@@ -5,6 +5,7 @@
  */
 
 let ServerSetting = require('./config.js');
+const convert = require('./Convert2.js');
 const path = require('path');
 const HLSServer = require('hls-server');
 const fs = require('fs');
@@ -222,7 +223,7 @@ io.on('connection', async (socket) => {
   socket.on('play', function (obj) {
     logger.info(socket.id);
     logger.info(obj);
-    轉檔(socket.id, obj);
+    convert(socket.id, obj, io, logger);
   });
   socket.on('disconnect', function () {
     try {

@@ -1,31 +1,31 @@
-import ServerSetting from './config.js';
-import { sep } from 'path';
-import { readdirSync, unlinkSync, promises, readFile } from 'fs';
-import { spawn } from 'child_process';
-import { io, logger } from './hls.js';
+let ServerSetting = require('./config.js');
+const path = require('path');
+const fs = require('fs');
+const child_process = require('child_process');
 
-export function 轉檔(id, dvr) {
+function 轉檔(id, dvr, io, logger) {
   try {
     process.kill(global[id].pid);
   } catch (e) {}
   try {
-    readdirSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep).forEach((file) => {
+    fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
       //logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       if (err) {
-        promises.mkdir(__dirname + sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
+        fs.promises.mkdir(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄, { recursive: true });
         return console.log('Unable to scan directory: ' + err);
       }
       if (file.startsWith(dvr.sessionID)) {
-        unlinkSync(__dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep + file);
+        fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       }
     });
   } catch (e) {}
-  var filename = __dirname + sep + ServerSetting.轉檔參數.輸出目錄 + sep + id + '.m3u8';
-  dvr.url = `http://${dvr.username}:${dvr.password}@${ServerSetting.攝影主機.位址}:${ServerSetting.攝影主機.PORT}${dvr.url}`;
+  logger.info(dvr);
+  var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + '.m3u8';
+  dvr.url = 'http://' + dvr.username + ':' + dvr.password + '@' + ServerSetting.攝影主機.位址 + ':' + ServerSetting.攝影主機.PORT + dvr.url;
   dvr.text = `[in]drawtext=fontfile=AGENCYB.TTF:fontsize=${ServerSetting.轉檔參數.浮水印.左上字體尺寸}:fontcolor=White:text=${ServerSetting.轉檔參數.浮水印.左上頻道} ${String(dvr.ch).padStart(2, '0')}:x=20:y=50,drawtext=fontfile=mingliu.ttc:fontsize=${
     ServerSetting.轉檔參數.浮水印.右下字體尺寸
   }:fontcolor=yellow:text=${ServerSetting.轉檔參數.浮水印.右下}:x=w-tw:y=h-th[out]`;
-  global[id] = spawn(
+  global[id] = child_process.spawn(
     'ffmpeg',
     [
       '-f',
@@ -66,8 +66,8 @@ export function 轉檔(id, dvr) {
     }
   );
   var start = new Date();
-  var refreshIntervalId = setInterval(() => {
-    readFile(filename, function (error, data) {
+  var refreshIntervalId = setInterval(function () {
+    fs.readFile(filename, function (error, data) {
       var diff = new Date().getTime() - start.getTime();
       if (diff / 1000 > ServerSetting.影片連線逾時秒數) {
         io.emit('loaderror', { msg: 'error', sessionID: id });
@@ -88,12 +88,13 @@ export function 轉檔(id, dvr) {
   }, 200);
   //var scriptOutput = "";
   global[id].stdout.setEncoding('utf8');
-  global[id].stdout.on('data', (data) => {
+  global[id].stdout.on('data', function (data) {
     logger.info(data);
   });
 
   global[id].stderr.setEncoding('utf8');
-  global[id].stderr.on('data', (data) => {
+  global[id].stderr.on('data', function (data) {
     logger.info(data);
   });
 }
+module.exports = 轉檔;
