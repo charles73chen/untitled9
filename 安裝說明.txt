@@ -1,3 +1,6 @@
+search-tool 1.0.1.exe =>找設備
+
+
 1.安裝NODEJS
 2.執行npm install pm2 -g
 3.執行npm install pm2-windows-startup -g
