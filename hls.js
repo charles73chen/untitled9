@@ -26,6 +26,7 @@ log4js.configure({
       filename: './log/hls',
       pattern: 'yyyy-MM-dd.log',
       alwaysIncludePattern: true,
+      daysToKeep: 90,
     },
     console: { type: 'console' },
   },
@@ -75,6 +76,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'text/html');
   let html = '';
   try {
+    logger.info(__dirname + url.parse(req.url).pathname);
     html = fs.readFileSync(__dirname + url.parse(req.url).pathname, 'utf8');
   } catch (e) {
     //res.status(500).send('Internal server error');
@@ -135,6 +137,7 @@ io.on('connection', async (socket) => {
     convert(socket.id, obj);
   });
   socket.on('disconnect', function () {
+    logger.info('disconnect:' + socket.id);
     try {
       process.kill(global[socket.id].pid);
     } catch (e) {}
