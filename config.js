@@ -12,6 +12,7 @@ const ServerSetting = {
     位址: 'rtspcameratest.ddns.net',
     PORT: 3000,
     串流URI: '/streams',
+    LOG留存天數: 90,
   }, //WEB主機
 
   需要浮水印: true, //尚未使用
