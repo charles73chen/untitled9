@@ -134,6 +134,8 @@ io.on('connection', async (socket) => {
   socket.on('play', function (obj) {
     logger.info(socket.id);
     logger.info(obj);
+    obj.username = ServerSetting.攝影主機.username;
+    obj.password = ServerSetting.攝影主機.password;
     convert(socket.id, obj);
   });
   socket.on('disconnect', function () {
