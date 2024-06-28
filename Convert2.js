@@ -21,7 +21,7 @@ function 轉檔(id, dvr) {
   } catch (e) {}
   hls.logger.info(dvr);
   var filename = __dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + id + '.m3u8';
-  dvr.url = `http://${dvr.username}:${dvr.password}@${ServerSetting.攝影主機.位址}:${ServerSetting.攝影主機.PORT}${dvr.url}`;
+  dvr.url = `http://${ServerSetting.攝影主機.username}:${ServerSetting.攝影主機.password}@${ServerSetting.攝影主機.位址}:${ServerSetting.攝影主機.PORT}${dvr.url}`;
   dvr.text = `[in]drawtext=fontfile=AGENCYB.TTF:fontsize=${ServerSetting.轉檔參數.浮水印.左上字體尺寸}:fontcolor=White:text=${ServerSetting.轉檔參數.浮水印.左上頻道} ${String(dvr.ch).padStart(2, '0')}:x=20:y=50,drawtext=fontfile=mingliu.ttc:fontsize=${
     ServerSetting.轉檔參數.浮水印.右下字體尺寸
   }:fontcolor=yellow:text=${ServerSetting.轉檔參數.浮水印.右下}:x=w-tw:y=h-th[out]`;
