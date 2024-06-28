@@ -26,7 +26,7 @@ log4js.configure({
       filename: './log/hls',
       pattern: 'yyyy-MM-dd.log',
       alwaysIncludePattern: true,
-      daysToKeep: ServerSetting.WEB主機.LOG留存天數,
+      backups: ServerSetting.WEB主機.LOG留存天數,
     },
     console: { type: 'console' },
   },
