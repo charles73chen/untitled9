@@ -15,6 +15,7 @@ function 轉檔(id, dvr) {
         return console.log('Unable to scan directory: ' + err);
       }
       if (file.startsWith(dvr.sessionID)) {
+        //hls.logger.info("111:"+__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
         fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
       }
     });

@@ -136,7 +136,21 @@ io.on('connection', async (socket) => {
     logger.info(obj);
     obj.username = ServerSetting.攝影主機.username;
     obj.password = ServerSetting.攝影主機.password;
+
+    try {
+      process.kill(global[socket.id].pid);
+    } catch (e) {}
+    try {
+      fs.readdirSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep).forEach((file) => {
+        logger.info(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+        if (file.startsWith(socket.id)) {
+          fs.unlinkSync(__dirname + path.sep + ServerSetting.轉檔參數.輸出目錄 + path.sep + file);
+        }
+      });
+    } catch (e) {}
+    global[socket.id] = null;
     convert(socket.id, obj);
+    
   });
   socket.on('disconnect', function () {
     logger.info('disconnect:' + socket.id);

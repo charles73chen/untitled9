@@ -254,6 +254,7 @@
                         hls.attachMedia(document.getElementById('video'));
                         hls.on(Hls.Events.MEDIA_ATTACHED, function () {
                             document.getElementById('video').muted = true;
+                            document.getElementById('video').currentTime = 0
                             document.getElementById('video').play();
                             //if (isMobileDevice()) {
                             //    video.style.width = window.innerWidth - 45;
