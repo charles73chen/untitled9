@@ -33,3 +33,5 @@ getList => 取得下拉頻道
 loadc => 當轉檔產生M3U8時發送
 loaderror => 當轉檔超過秒數時發送
 disconnect => 斷線刪除sessionID下的轉檔
+
+9.pm2 monit
