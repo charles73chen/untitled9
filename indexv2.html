@@ -1,0 +1,262 @@
+<html lang="zh-tw">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>攝影機串流</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+</head>
+
+<body>
+<div id="app" class="container">
+    <label id="sessionId" style="display: none"></label><br><label id="source" style="display: none"></label><br>
+    <div class="row">
+        <div class="col ">
+            <input type="hidden" value="admin" id="username"><input type="hidden" value="abcd1234" id="password">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <input type="datetime-local" id="ttime" class="form-control">
+        </div>
+        <div class="col">
+            <select id="攝影主機" class="form-select"></select>
+        </div>
+        <div class="col">
+            <select id="crar" class="form-select"></select>
+        </div>
+        <div class="col-6 align-items-center">
+
+
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-primary" id="load" style="width: 100px;"
+                        onclick="p1()">即時
+                </button>
+                <button type="button" class="btn btn-success" id="load2" onclick="p2()">回放</button>
+                <!--<button type="button" class="btn btn-warning" id="load3" onclick="p3()">輪播</button>-->
+            </div>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <i class="fas fa-video fa-2x" id="recordBtn" style="cursor: pointer;"></i>
+                <i class="fas fa-camera fa-2x" style="margin-left: 5px;cursor: pointer;" onclick="capture()"></i>
+                <!--<button type="button" class="btn btn-primary" id="recordBtn">錄影</button>
+            <button type="button" class="btn btn-success" >截圖</button>-->
+            </div>
+
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label style="margin-left: 5px"></label>Loading:<label id="time"></label>
+        </div>
+    </div>
+    <!--
+<div class="row">
+    <div class="col-1 align-items-center align-self-center" ><i class="fas fa-chevron-left fa-3x" onclick="goleft()"></i></div>
+    <div class="col align-items-center">
+        <div class="row">
+            <div class="col-6" id="view1" data-flg="0" onclick="playview(this)"></div>
+            <div class="col-6" id="view2" data-flg="1" onclick="playview(this)"></div>
+        </div>
+        <div class="row">
+            <div class="col-6" id="view3" data-flg="2" onclick="playview(this)"></div>
+            <div class="col-6" id="view4" data-flg="3" onclick="playview(this)"></div>
+        </div>
+    </div>
+    <div class="col-1 align-items-center align-self-center"><i class="fas fa-chevron-right fa-3x" onclick="goright()"></i></div>
+
+
+
+
+</div>-->
+    <div class="row">
+        <div class="col-1"></div>
+        <div class='col ratio ratio-16x9'>
+            <video controls id='video' autoplay></video>
+        </div>
+        <div class="col-1">
+
+
+        </div>
+
+        <br>
+        <br>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script
+            src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.1/dist/loadingoverlay.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.min.js"></script>
+    <script src="JS/rtsp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    <script>
+        const video = document.getElementById('video');
+        const $crar = $("#crar");
+        const $tiem = $('#time')
+        const $攝影主機 = $('#攝影主機');
+        var host = "";
+        var port = "";
+        var socket = io();
+        var sessionID = "";
+        var startDate = "";
+        var refreshIntervalId;
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+        }
+
+
+        function 撥放摄影機(撥放時間) {
+            var start = $("#攝影主機 option:selected").index();
+            var playback = '';
+            if (撥放時間 != undefined) {
+                if (撥放時間 != "") {
+                    var b = Math.floor(撥放時間.getTime() / 1000);
+                    playback = '&beg=' + b;
+                }
+            }
+            var c = $("#crar option:selected").attr("data-type");
+            dvrs[parseInt(start)].url = $攝影主機.val() + ":"+port+ dvrs[parseInt(start)].APIURI + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+            dvrs[parseInt(start)].sessionID = socket.id;
+            dvrs[parseInt(start)].ch = $("#crar option:selected").index() + 1;
+            //dvrs[parseInt(start)].username = $('#username').val();
+            //dvrs[parseInt(start)].password = $('#password').val();
+            socket.emit('play', dvrs[parseInt(start)]);
+        }
+
+        /*
+        function 撥放摄影機(撥放時間) {
+            var start = $("#crar option:selected").index();
+            var playback = '';
+            if (撥放時間 != undefined) {
+                if (撥放時間 != "") {
+                    var b = Math.floor(撥放時間.getTime() / 1000);
+                    playback = '&beg=' + b;
+                }
+            }
+            var c = $("#crar option:selected").attr("data-type");
+            dvrs[parseInt(start)].url = dvrs[parseInt(start)].durl + playback + "&audio=" + parseInt(c, 2) + "&iframe=" + parseInt(c, 2) + "&pframe=" + parseInt(c, 2);
+            dvrs[parseInt(start)].sessionID = socket.id;
+            dvrs[parseInt(start)].ch = c;
+            socket.emit('play', dvrs[parseInt(start)]);
+        }
+
+         */
+        socket.on('loaderror', function (msg) {
+            if (msg.sessionID === socket.id) {
+                $.LoadingOverlay("hide");
+                alert("連線失敗");
+            }
+        });
+
+        socket.on('sessionID', function (msg) {
+            //if ($('#sessionId').html() == '') {
+            //    sessionID = msg;
+            $('#sessionId').html(socket.id);
+            //}
+        });
+        socket.on('getList', function (msg) {
+            dvrs = msg.攝影主機;
+            port = msg.WEB主機.PORT;
+            for (var i = 0; i < msg.攝影主機.length; i++) {
+
+                $攝影主機.append("<option  value='" + msg.攝影主機[i].位址 + "'>" + msg.攝影主機[i].主機名稱 + "</option>");
+
+                //$crar.append("<option data-type='" + dvrs[i].ch + "' value='" + dvrs[i].wsPort + "'>ch" + dvrs[i].id + "</option>");
+            }
+
+            $crar.html("");
+
+            for (var i = 1; i <= 44; i++) {
+                var k = '';
+                for (j = 1; j < i; j++) {
+                    k = k + '0';
+                }
+
+                $crar.append("<option data-type='" + ('1' + k).padStart(44, '0') + "' value=''>ch" + i + "</option>");
+            }
+        });
+        socket.on('loadc', function (msg) {
+            if (msg.sessionID === socket.id) {
+
+                clearInterval(refreshIntervalId);
+                $.LoadingOverlay("hide");
+                $tiem.html(moment().diff(startDate, "milliseconds") + "ms");
+                refreshIntervalId = setTimeout(function () {
+                    location.reload();//10分鐘後畫面重整
+                }, 1000 * 60 * 10)
+                if (Hls.isSupported()) {
+                    //$('#source').html("http://" + host + ":3000/streams/" + msg.sessionID + ".m3u8")
+                    hls.loadSource("/streams/" + socket.id + ".m3u8");
+                    hls.attachMedia(document.getElementById('video'));
+                    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                        document.getElementById('video').muted = true;
+                        document.getElementById('video').currentTime = 0
+                        document.getElementById('video').play();
+                        //if (isMobileDevice()) {
+                        //    video.style.width = window.innerWidth - 45;
+                        //}
+                    });
+                } else {
+                    document.getElementById('video').src = "/streams/" + socket.id + ".m3u8";
+                    setTimeout(function () {
+                        document.getElementById('video').play();
+                        if (isMobileDevice()) {
+                            // video.style.width = window.innerWidth - 45;
+                        }
+                    }, 2000)
+                }
+            }
+        });
+
+
+        const recordBtn = document.getElementById("recordBtn");
+        let recording = false;
+        let mediaRecorder;
+        let recordedChunks;
+
+        recordBtn.addEventListener("click", () => {
+            recording = !recording;
+            if (recording) {
+                recordBtn.style.color = "red";
+                const stream = document.getElementById('video').captureStream(25);
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm',
+                    ignoreMutedMedia: true
+                });
+                recordedChunks = [];
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) {
+                        recordedChunks.push(e.data);
+                    }
+                };
+                mediaRecorder.start();
+            } else {
+                recordBtn.style.color = "";
+                mediaRecorder.stop();
+                setTimeout(() => {
+                    const blob = new Blob(recordedChunks, {
+                        type: "video/webm"
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "recording_" + moment().format('YYYY-MM-DDTHH:mm') + ".webm";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    outputVideoURL = URL.createObjectURL(blob)
+                    document.querySelector('#outputVideo').src = outputVideoURL
+                }, 0);
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>

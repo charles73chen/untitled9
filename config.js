@@ -1,16 +1,25 @@
 const os = require('os');
 const ServerSetting = {
-  攝影主機: {
+  攝影主機: [{
+    主機名稱:'192.168.1.110',
     camerLength: 32, //頻道數量
-    位址: '192.168.1.113',
+    位址: '192.168.1.110',
     PORT: 80,
     username: 'admin', //攝影主機登入帳號
     userpass: 'abcd1234', //攝影主機登入密碼
     APIURI: '/cgi-bin/net_video.cgi?hq=0',
-  }, //攝影主機
+  },{
+    主機名稱:'192.168.1.109',
+    camerLength: 32, //頻道數量
+    位址: '192.168.1.109',
+    PORT: 80,
+    username: 'admin', //攝影主機登入帳號
+    userpass: 'abcd1234', //攝影主機登入密碼
+    APIURI: '/cgi-bin/net_video.cgi?hq=0',
+  }], //攝影主機
   WEB主機: {
-    位址: 'rtspcameratest.ddns.net',
-    PORT: 3000,
+    位址: 'c1b69b2.i-dvr.net',
+    PORT: 3002,
     串流URI: '/streams',
     LOG留存天數: 90,
   }, //WEB主機
@@ -28,7 +37,7 @@ const ServerSetting = {
     },
     浮水印: {
       左上頻道: 'CH',
-      左上字體尺寸: 40,
+      左上字體尺寸: 80,
       右下: '浮水印',
       右下字體尺寸: 40,
     }, //右下角水印字樣
