@@ -1,4 +1,5 @@
 //ffmpeg -f h264 -i "http://admin:abcd1234@rtspcameratest.ddns.net:8080/cgi-bin/net_video.cgi?hq=0&audio=1&iframe=1&pframe=1" -b:v 800K -level 3.0 -s 640x360 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
+//http://c1b69b2.i-dvr.net:4000/cgi-bin/net_jpeg.cgi?push=1&ch=3
 /*
 執行請看安裝說明
 

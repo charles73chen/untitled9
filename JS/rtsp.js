@@ -1,4 +1,7 @@
 function p1() {
+    $('#mediadiv').html("<video controls id='video' autoplay></video>");
+    $('#mediadiv').attr("class","col ratio ratio-16x9")
+
     if ($crar.val() == '0') {
 
     } else {
@@ -11,7 +14,47 @@ function p1() {
 
 }
 
+function p4(){
+
+    //
+    var start = $("#攝影主機 option:selected").index();
+    var html="<div class=\"owl-carousel owl-theme\">";
+    for(var i=1;i<33;i++){
+        var k = '';
+        for (j = 1; j < i; j++) {
+            k = k + '0';
+        }
+
+        html=html+"<div class='item'><img  src='http://c1b69b2.i-dvr.net:"+dvrs[parseInt(start)].對外PORT+"/cgi-bin/net_jpeg.cgi?push=1&ch="+parseInt(('1' + k).padStart(44, '0'),2)+"'></div>";
+    }
+    html = html+"</div>";
+    $('#mediadiv').html("<img  src='http://c1b69b2.i-dvr.net:"+dvrs[parseInt(start)].對外PORT+"/cgi-bin/net_jpeg.cgi?push=1&ch="+parseInt($("#crar option:selected").attr("data-type"),2)+"'>");
+    //$('#mediadiv').html(html);
+    //$('#mediadiv').attr("class","col")
+    /*
+    $('.owl-carousel').owlCarousel({
+        loop:true,
+        margin:10,
+        nav:true,
+        responsive:{
+            0:{
+                items:1
+            },
+            600:{
+                items:3
+            },
+            1000:{
+                items:5
+            }
+        }
+    })
+
+     */
+
+}
+
 function p3(){
+    $('#mediadiv').html("<video controls id='video' autoplay></video>");
     startDate = moment();;
     var arr = $('#crar option')
     console.log(arr.length);
